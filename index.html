@@ -15,7 +15,15 @@
 <meta name="twitter:description" content="USA-manufactured, third-party verified research peptides. ≥99% purity guaranteed."/>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%23031c3d'/><circle cx='50' cy='50' r='18' fill='none' stroke='%234fa3f7' stroke-width='6'/><line x1='50' y1='20' x2='50' y2='32' stroke='%234fa3f7' stroke-width='6' stroke-linecap='round'/><line x1='50' y1='68' x2='50' y2='80' stroke='%234fa3f7' stroke-width='6' stroke-linecap='round'/><line x1='20' y1='50' x2='32' y2='50' stroke='%234fa3f7' stroke-width='6' stroke-linecap='round'/><line x1='68' y1='50' x2='80' y2='50' stroke='%234fa3f7' stroke-width='6' stroke-linecap='round'/></svg>" type="image/svg+xml"/>
 <link rel="canonical" href="https://cryonixresearch.com"/>
-<!-- Notifications handled server-side via Netlify Forms - no third-party keys in page source -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+  // EmailJS init — replace "YOUR_PUBLIC_KEY" with your EmailJS public key before going live
+  try {
+    if (typeof emailjs !== 'undefined' && 'YOUR_PUBLIC_KEY' !== 'YOUR_PUBLIC_KEY') {
+      emailjs.init("YOUR_PUBLIC_KEY");
+    }
+  } catch(e) { console.warn('EmailJS not initialized:', e); }
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,400;1,500&display=swap" rel="stylesheet"/>
@@ -239,7 +247,6 @@ nav a:hover,nav a.active{background:var(--sky);color:var(--blue)}
 .badge-sale{background:#fde8e8;color:var(--red)}
 .badge-new{background:#e0f5ed;color:var(--green)}
 .badge-hot{background:#fff3e0;color:#a34500}
-.badge-low{background:#fff4d6;color:#9a6700}
 .mg-pill{position:absolute;bottom:10px;right:10px;background:rgba(5,42,90,.78);color:#a8cff5;font-size:10px;font-weight:600;letter-spacing:.04em;padding:3px 8px;border-radius:100px}
 .product-body{padding:14px 15px 15px;flex:1;display:flex;flex-direction:column}
 .product-name{font-family:var(--font-head);font-size:15px;font-weight:400;color:var(--text-dark);margin-bottom:4px;line-height:1.25}
@@ -488,17 +495,7 @@ footer{background:var(--navy2);color:#6895c4;padding:48px 24px 28px}
   <input name="bot-field"/>
 </form>
 
-<!-- NETLIFY FORM DETECTION: entry-gate signups -->
-<form name="gate-signup" data-netlify="true" netlify-honeypot="bot-field" hidden>
-  <input type="email" name="email"/>
-  <input type="text" name="company"/>
-  <input type="text" name="age-confirmed"/>
-  <input type="text" name="newsletter-optin"/>
-  <input type="text" name="timestamp"/>
-  <input name="bot-field"/>
-</form>
-
-<!-- NETLIFY FORM DETECTION: orders -->
+<!-- NETLIFY FORM DETECTION — orders (do not remove) -->
 <form name="order" data-netlify="true" netlify-honeypot="bot-field" hidden>
   <input type="text" name="order-number"/>
   <input type="text" name="customer-name"/>
@@ -516,26 +513,11 @@ footer{background:var(--navy2);color:#6895c4;padding:48px 24px 28px}
   <div class="age-gate">
     <div class="age-gate-logo">Cryonix<span style="color:var(--blue)">.</span></div>
     <h2>For Research Use Only</h2>
-    <p>All products are sold strictly for <strong>in-vitro research and laboratory use</strong>. Enter your details to continue.</p>
-    <form id="gateForm" onsubmit="submitGate(event)" style="text-align:left;margin-top:6px">
-      <div class="form-group" style="margin-bottom:12px">
-        <label class="form-label">Work Email</label>
-        <input type="email" class="form-input" id="gateEmail" placeholder="you@institution.edu" required/>
-      </div>
-      <div class="form-group" style="margin-bottom:12px">
-        <label class="form-label">Company / Institution</label>
-        <input type="text" class="form-input" id="gateCompany" placeholder="e.g. Smith Research Lab" required/>
-      </div>
-      <label style="display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:var(--text-mid);margin-bottom:11px;cursor:pointer">
-        <input type="checkbox" id="gateAge" style="margin-top:3px;flex-shrink:0" required/>
-        <span>I confirm I am 21 years of age or older and accessing this site as a research professional.</span>
-      </label>
-      <label style="display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:var(--text-mid);margin-bottom:18px;cursor:pointer">
-        <input type="checkbox" id="gateNews" style="margin-top:3px;flex-shrink:0"/>
-        <span>Email me product updates, restock alerts, and offers.</span>
-      </label>
-      <button type="submit" class="btn-age-yes" style="width:100%">Enter Site &#8594;</button>
-    </form>
+    <p>All products sold by Cryonix Research are strictly for <strong>in-vitro research and laboratory purposes only</strong>. You must be 18+ and a licensed research professional to continue.</p>
+    <div class="age-btns">
+      <button class="btn-age-yes" id="ageYes">I Confirm — Enter</button>
+      <button class="btn-age-no" onclick="window.location.href='https://google.com'">Exit</button>
+    </div>
     <p class="age-fine">By entering you confirm you are accessing this site for lawful research purposes only. Not intended to diagnose, treat, cure, or prevent any disease.</p>
   </div>
 </div>
@@ -1020,33 +1002,26 @@ footer{background:var(--navy2);color:#6895c4;padding:48px 24px 28px}
 //  DATA
 // ═══════════════════════════════
 const PRODUCTS = [
-  // -----------------------------------------------------------------
-  //  STOCK / INVENTORY - set "stock" on any product to:
-  //    'in'  = available (normal)
-  //    'low' = shows an amber "Low Stock" badge, still buyable
-  //    'out' = shows "Out of Stock", greys it out, disables Add to Cart
-  //  To restock or change a price, edit the product line and re-deploy.
-  // -----------------------------------------------------------------
   // Metabolic (5)
-  {name:'Tirzepatide',mg:'5 mg',sub:'Dual GIP/GLP-1 receptor agonist',price:34.99,orig:null,badge:'hot',featured:true,cat:'Metabolic',stock:'in',desc:'Tirzepatide is a dual GIP and GLP-1 receptor agonist of significant interest in metabolic and glycemic control research, studied extensively in preclinical and clinical models.'},
-  {name:'Semaglutide',mg:'5 mg',sub:'GLP-1 receptor agonist',price:29.99,orig:null,badge:'hot',featured:true,cat:'Metabolic',stock:'in',desc:'Semaglutide is a GLP-1 receptor agonist widely studied in metabolic research models. Research focuses on glycemic regulation, energy homeostasis, and appetite signaling pathways.'},
-  {name:'Retatrutide',mg:'5 mg',sub:'Triple GLP-1/GIP/glucagon receptor agonist',price:44.99,orig:null,badge:'new',featured:true,cat:'Metabolic',stock:'in',desc:'Retatrutide is a triagonist peptide targeting GLP-1, GIP, and glucagon receptors simultaneously — an emerging research compound for energy homeostasis and metabolic studies.'},
-  {name:'Cagrilintide',mg:'5 mg',sub:'Long-acting amylin analogue',price:59.99,orig:null,badge:'new',featured:true,cat:'Metabolic',stock:'in',desc:'Cagrilintide is a long-acting amylin analogue studied in combination metabolic research protocols, with interest in appetite regulation and glycemic control signaling.'},
-  {name:'MOTS-c',mg:'10 mg',sub:'Mitochondria-derived peptide',price:49.99,orig:null,badge:'',cat:'Metabolic',stock:'in',desc:'MOTS-c is a mitochondria-derived peptide studied for roles in metabolic homeostasis, glucose regulation, insulin sensitivity, and exercise-mimicking effects in cellular models.'},
+  {name:'Tirzepatide',mg:'5 mg',sub:'Dual GIP/GLP-1 receptor agonist',price:34.99,orig:null,badge:'hot',featured:true,cat:'Metabolic',desc:'Tirzepatide is a dual GIP and GLP-1 receptor agonist of significant interest in metabolic and glycemic control research, studied extensively in preclinical and clinical models.'},
+  {name:'Semaglutide',mg:'5 mg',sub:'GLP-1 receptor agonist',price:29.99,orig:null,badge:'hot',featured:true,cat:'Metabolic',desc:'Semaglutide is a GLP-1 receptor agonist widely studied in metabolic research models. Research focuses on glycemic regulation, energy homeostasis, and appetite signaling pathways.'},
+  {name:'Retatrutide',mg:'5 mg',sub:'Triple GLP-1/GIP/glucagon receptor agonist',price:44.99,orig:null,badge:'new',featured:true,cat:'Metabolic',desc:'Retatrutide is a triagonist peptide targeting GLP-1, GIP, and glucagon receptors simultaneously — an emerging research compound for energy homeostasis and metabolic studies.'},
+  {name:'Cagrilintide',mg:'5 mg',sub:'Long-acting amylin analogue',price:59.99,orig:null,badge:'new',featured:true,cat:'Metabolic',desc:'Cagrilintide is a long-acting amylin analogue studied in combination metabolic research protocols, with interest in appetite regulation and glycemic control signaling.'},
+  {name:'MOTS-c',mg:'10 mg',sub:'Mitochondria-derived peptide',price:49.99,orig:null,badge:'',cat:'Metabolic',desc:'MOTS-c is a mitochondria-derived peptide studied for roles in metabolic homeostasis, glucose regulation, insulin sensitivity, and exercise-mimicking effects in cellular models.'},
   // Recovery & Repair (2)
-  {name:'BPC-157',mg:'5 mg',sub:'Body protection compound',price:29.99,orig:null,badge:'',cat:'Recovery & Repair',stock:'in',desc:'BPC-157 is a pentadecapeptide extensively studied for tissue repair, gut healing, and anti-inflammatory mechanisms in preclinical research models.'},
-  {name:'TB-500',mg:'5 mg',sub:'Thymosin beta-4 research peptide',price:44.99,orig:null,badge:'',cat:'Recovery & Repair',stock:'in',desc:'TB-500 is a synthetic fragment of Thymosin Beta-4, researched for roles in actin regulation, cellular migration, angiogenesis, and wound healing processes.'},
+  {name:'BPC-157',mg:'5 mg',sub:'Body protection compound',price:29.99,orig:null,badge:'',cat:'Recovery & Repair',desc:'BPC-157 is a pentadecapeptide extensively studied for tissue repair, gut healing, and anti-inflammatory mechanisms in preclinical research models.'},
+  {name:'TB-500',mg:'5 mg',sub:'Thymosin beta-4 research peptide',price:44.99,orig:null,badge:'',cat:'Recovery & Repair',desc:'TB-500 is a synthetic fragment of Thymosin Beta-4, researched for roles in actin regulation, cellular migration, angiogenesis, and wound healing processes.'},
   // Growth Factors (1)
-  {name:'Tesamorelin',mg:'5 mg',sub:'GHRH analogue — lipodystrophy research',price:64.99,orig:null,badge:'',cat:'Growth Factors',stock:'in',desc:'Tesamorelin is a synthetic GHRH analogue studied in models of visceral adiposity and metabolic dysfunction, noted for IGF-1 stimulation and body composition changes in research contexts.'},
+  {name:'Tesamorelin',mg:'5 mg',sub:'GHRH analogue — lipodystrophy research',price:64.99,orig:null,badge:'',cat:'Growth Factors',desc:'Tesamorelin is a synthetic GHRH analogue studied in models of visceral adiposity and metabolic dysfunction, noted for IGF-1 stimulation and body composition changes in research contexts.'},
   // Blends (3)
-  {name:'BPC-157 / TB-500 Blend',mg:'5 mg / 5 mg',sub:'Recovery & tissue repair dual blend',price:54.99,orig:null,badge:'sale',cat:'Blends',stock:'in',desc:'A research blend combining BPC-157 and TB-500, two peptides independently studied for tissue repair mechanisms, angiogenesis, and recovery signaling in in-vitro models.'},
-  {name:'CJC-1295 + Ipamorelin',mg:'5 mg / 5 mg',sub:'Dual GH-axis research blend',price:59.99,orig:null,badge:'',cat:'Blends',stock:'in',desc:'A synergistic blend of CJC-1295 (GHRH analogue) and Ipamorelin (GHRP) studied in combination for complementary roles in GH pulse amplitude and IGF-1 modulation.'},
-  {name:'CJC-1295 No DAC',mg:'5 mg',sub:'Short-acting GHRH analogue',price:39.99,orig:null,badge:'',cat:'Blends',stock:'in',desc:'CJC-1295 without DAC (Drug Affinity Complex) is a modified GHRH analogue with a shorter half-life, studied for pulsatile GH release patterns in research models.'},
+  {name:'BPC-157 / TB-500 Blend',mg:'5 mg / 5 mg',sub:'Recovery & tissue repair dual blend',price:54.99,orig:null,badge:'sale',cat:'Blends',desc:'A research blend combining BPC-157 and TB-500, two peptides independently studied for tissue repair mechanisms, angiogenesis, and recovery signaling in in-vitro models.'},
+  {name:'CJC-1295 + Ipamorelin',mg:'5 mg / 5 mg',sub:'Dual GH-axis research blend',price:59.99,orig:null,badge:'',cat:'Blends',desc:'A synergistic blend of CJC-1295 (GHRH analogue) and Ipamorelin (GHRP) studied in combination for complementary roles in GH pulse amplitude and IGF-1 modulation.'},
+  {name:'CJC-1295 No DAC',mg:'5 mg',sub:'Short-acting GHRH analogue',price:39.99,orig:null,badge:'',cat:'Blends',desc:'CJC-1295 without DAC (Drug Affinity Complex) is a modified GHRH analogue with a shorter half-life, studied for pulsatile GH release patterns in research models.'},
   // Anti-Aging (2)
-  {name:'Epithalon',mg:'10 mg',sub:'Tetrapeptide longevity compound',price:34.99,orig:null,badge:'',cat:'Anti-Aging',stock:'in',desc:'Epithalon (Epitalon) is a tetrapeptide researched for effects on telomerase activity, circadian rhythm regulation, and longevity-associated gene expression.'},
-  {name:'NAD+',mg:'100 mg',sub:'Nicotinamide adenine dinucleotide',price:24.99,orig:null,badge:'',cat:'Anti-Aging',stock:'in',desc:'NAD+ is a critical coenzyme in cellular energy metabolism. Research focuses on sirtuin activation, DNA repair, mitochondrial function, and aging-related pathways.'},
+  {name:'Epithalon',mg:'10 mg',sub:'Tetrapeptide longevity compound',price:34.99,orig:null,badge:'',cat:'Anti-Aging',desc:'Epithalon (Epitalon) is a tetrapeptide researched for effects on telomerase activity, circadian rhythm regulation, and longevity-associated gene expression.'},
+  {name:'NAD+',mg:'100 mg',sub:'Nicotinamide adenine dinucleotide',price:24.99,orig:null,badge:'',cat:'Anti-Aging',desc:'NAD+ is a critical coenzyme in cellular energy metabolism. Research focuses on sirtuin activation, DNA repair, mitochondrial function, and aging-related pathways.'},
   // Research Water (1)
-  {name:'Bacteriostatic Water',mg:'30 mL',sub:'Sterile bacteriostatic water',price:14.99,orig:null,badge:'',cat:'Research Water',stock:'in',desc:'Sterile bacteriostatic water containing 0.9% benzyl alcohol, intended for reconstitution of lyophilized research peptides. Multi-dose compatible.'},
+  {name:'Bacteriostatic Water',mg:'30 mL',sub:'Sterile bacteriostatic water',price:14.99,orig:null,badge:'',cat:'Research Water',desc:'Sterile bacteriostatic water containing 0.9% benzyl alcohol, intended for reconstitution of lyophilized research peptides. Multi-dose compatible.'},
 ];
 
 const FAQS = [
@@ -1099,32 +1074,13 @@ function saveCart() {
 // ═══════════════════════════════
 //  AGE GATE
 // ═══════════════════════════════
-// ENTRY GATE - collects email, company, age confirmation + newsletter consent
-function submitGate(e) {
-  e.preventDefault();
-  const email = document.getElementById('gateEmail').value.trim();
-  const company = document.getElementById('gateCompany').value.trim();
-  const ageOk = document.getElementById('gateAge').checked;
-  const news = document.getElementById('gateNews').checked;
-  if (!email || !email.includes('@')) { toast('Please enter a valid email','error'); return; }
-  if (!company) { toast('Please enter your company or institution','error'); return; }
-  if (!ageOk) { toast('You must confirm you are 21 or older','error'); return; }
-  const enc = new URLSearchParams();
-  enc.append('form-name','gate-signup');
-  enc.append('email', email);
-  enc.append('company', company);
-  enc.append('age-confirmed','yes');
-  enc.append('newsletter-optin', news ? 'yes' : 'no');
-  enc.append('timestamp', new Date().toLocaleString());
-  fetch('/', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: enc.toString()}).catch(()=>{});
-  try {
-    sessionStorage.setItem('cryonix_gate_ok','1');
-    localStorage.setItem('cryonix_lead', JSON.stringify({email, company, news}));
-  } catch(e){}
-  const ag = document.getElementById('ageGate'); if(ag) ag.style.display='none';
-}
+document.getElementById('ageYes').onclick = () => {
+  const _ag = document.getElementById('ageGate'); if(_ag) _ag.style.display = 'none';
+  try { sessionStorage.setItem('cryonix_age_ok','1'); } catch(e) {}
+};
+// Hide age gate if already confirmed this session
 try {
-  if (sessionStorage.getItem('cryonix_gate_ok') === '1') {
+  if (sessionStorage.getItem('cryonix_age_ok') === '1') {
     const _ag = document.getElementById('ageGate'); if(_ag) _ag.style.display = 'none';
   }
 } catch(e) {}
@@ -1202,25 +1158,24 @@ function flyToCart(originEl) {
 // ═══════════════════════════════
 //  PROMO / AFFILIATE CODES
 // ═══════════════════════════════
-// Promo / affiliate codes are validated SERVER-SIDE in netlify/functions/validate-promo.js
-// They are intentionally NOT stored in this page, so visitors cannot read or forge them.
+// Promo codes stored encoded — validate server-side before going live
+const _PC = {"REVYRklUMjA=": {"type": "percent", "value": 20, "label": "20% off", "affiliate": "dexfit"}, "Q1JZTzIw": {"type": "percent", "value": 20, "label": "20% off", "affiliate": "cryo"}, "RlJBTjE1": {"type": "percent", "value": 15, "label": "15% off", "affiliate": "fran"}, "TklDSzE1": {"type": "percent", "value": 15, "label": "15% off", "affiliate": "nick"}, "Sk9ORVMxNQ==": {"type": "percent", "value": 15, "label": "15% off", "affiliate": "jones"}, "RklTSFkyMA==": {"type": "percent", "value": 20, "label": "20% off", "affiliate": "fishy"}};
+function _dk(s){ try{return atob(s)}catch(e){return ''} }
+function lookupPromo(code) {
+  for(const [enc, data] of Object.entries(_PC)) {
+    if(_dk(enc) === code.toUpperCase()) return data;
+  }
+  return null;
+}
 
 let activePromo = null;
 
-async function applyPromo() {
+function applyPromo() {
   const raw = document.getElementById('promoInput').value.trim().toUpperCase();
   const input = document.getElementById('promoInput');
   const msg = document.getElementById('promoMsg');
   if (!raw) { showPromoMsg('Please enter a code','invalid'); return; }
-  let promo = null;
-  try {
-    const res = await fetch('/.netlify/functions/validate-promo', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({code: raw})
-    });
-    const data = await res.json();
-    if (data && data.ok) promo = {type:data.type, value:data.value, label:data.label};
-  } catch(err) { /* offline or function unavailable */ }
+  const promo = lookupPromo(raw);
   if (!promo) {
     input.className = 'promo-input invalid';
     showPromoMsg('Invalid code. Please try again.','invalid');
@@ -1229,10 +1184,11 @@ async function applyPromo() {
   activePromo = {code: raw, ...promo};
   input.className = 'promo-input valid';
   showPromoMsg(`${promo.label} applied!`, 'valid');
+  // Show tag, hide input
   setTimeout(() => {
     const _piw = document.getElementById('promoInputWrap'); if(_piw) _piw.style.display = 'none';
     const _ptw = document.getElementById('promoTagWrap'); if(_ptw) _ptw.style.display = 'block';
-    document.getElementById('promoTagCode').textContent = raw + ' - ' + promo.value + '% off';
+    document.getElementById('promoTagCode').textContent = raw + ' — ' + promo.value + '% off';
     msg.style.display = 'none';
   }, 800);
   renderCartDrawer();
@@ -1422,7 +1378,7 @@ function openModal(idx) {
   document.getElementById('mOrig').textContent = p.orig ? '$' + p.orig.toFixed(2) : '';
   document.getElementById('mDesc').textContent = p.desc;
   const inCart = cart.find(c => c.idx === idx);
-  const inStock = p.stock !== 'out';
+  const inStock = p.stock !== false;
   const btn = document.getElementById('mCartBtn');
   if (!inStock) {
     btn.className = 'btn-modal-add';
@@ -1527,18 +1483,13 @@ function renderProducts() {
   grid.innerHTML = '';
   filtered.forEach((p) => {
     const idx = PRODUCTS.indexOf(p);
-    const status = (p.stock || 'in').toLowerCase();
-    const inStock = status !== 'out';
-    let badge = '';
-    if (status === 'out') badge = '<span class="badge badge-oos">Out of Stock</span>';
-    else if (status === 'low') badge = '<span class="badge badge-low">Low Stock</span>';
-    else {
-      const b = (p.badge || '').toLowerCase();
-      if (b === 'hot') badge = '<span class="badge badge-hot">Hot</span>';
-      else if (b === 'new') badge = '<span class="badge badge-new">New</span>';
-      else if (b === 'sale') badge = '<span class="badge badge-sale">Sale</span>';
-      else if (b === 'featured') badge = '<span class="badge badge-featured">Featured</span>';
-    }
+    const inStock = p.stock !== false;
+    const featuredBadge = '<span class="badge badge-featured">Featured</span>';
+    const mainBadge = !inStock ? '<span class="badge badge-oos">Out of Stock</span>'
+      : p.badge==='sale'?'<span class="badge badge-sale">Sale</span>'
+      : p.badge==='new'?'<span class="badge badge-new">New</span>'
+      : p.badge==='hot'?'<span class="badge badge-hot">Hot</span>':'';
+    const badge = mainBadge || featuredBadge;
     const oosOverlay = !inStock ? '<div class="oos-overlay"><span class="oos-label">Out of Stock</span></div>' : '';
     const priceHtml = p.orig
       ? `<span class="price-orig">$${p.orig.toFixed(2)}</span><span class="price-now">$${p.price.toFixed(2)}</span>`
@@ -1722,6 +1673,10 @@ function handleContactSubmit(e) {
     form.style.display = 'none';
     const _cs = document.getElementById('contactSuccess'); if(_cs) _cs.style.display = 'block';
     toast('Message sent! We\'ll reply within 1 business day.','success');
+
+    // Email confirmation to the customer + notification to you are sent
+    // server-side by the Brevo Netlify function when this contact form posts.
+    // (No client-side email keys; nothing to configure in the page.)
   })
   .catch(() => {
     toast('Something went wrong. Please try again.','error');
@@ -1808,19 +1763,19 @@ Time: ${new Date().toLocaleString()}
   const customerInfo = `Customer: ${fname} ${lname}\nEmail: ${email}\nShip to: ${address}, ${city}, ${state} ${zip}`;
   const fullMessage = `NEW ORDER — CRYONIX RESEARCH\n\n${customerInfo}\n\n${orderSummary}`;
 
-  // Record order server-side via Netlify Forms (appears in your Netlify dashboard).
-  // Replace with a real payment + fulfillment flow before going live.
-  const _ord = new URLSearchParams();
-  _ord.append('form-name','order');
-  _ord.append('order-number', orderNum);
-  _ord.append('customer-name', fname + ' ' + lname);
-  _ord.append('email', email);
-  _ord.append('address', `${address}, ${city}, ${state} ${zip}`);
-  _ord.append('items', itemLines.replace(/\n/g,' | '));
-  _ord.append('total', '$' + total.toFixed(2));
-  _ord.append('promo', activePromo ? `${activePromo.code} (${activePromo.value}% off)` : 'none');
-  _ord.append('timestamp', new Date().toLocaleString());
-  fetch('/', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: _ord.toString()}).catch(()=>{});
+  // Record the order + send branded confirmation emails via the Brevo
+  // Netlify function (fires automatically on this "order" form submission).
+  const _cxOrder = new URLSearchParams();
+  _cxOrder.append('form-name', 'order');
+  _cxOrder.append('order-number', orderNum);
+  _cxOrder.append('customer-name', fname + ' ' + lname);
+  _cxOrder.append('email', email);
+  _cxOrder.append('address', address + ', ' + city + ', ' + state + ' ' + zip);
+  _cxOrder.append('items', cart.map(function(c){return PRODUCTS[c.idx].name + ' (' + PRODUCTS[c.idx].mg + ') x' + c.qty;}).join(', '));
+  _cxOrder.append('total', '$' + total.toFixed(2));
+  _cxOrder.append('promo', activePromo ? activePromo.code : '');
+  _cxOrder.append('timestamp', new Date().toLocaleString());
+  fetch('/', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: _cxOrder.toString() }).catch(function(){});
 
   toast('Order placed! You will receive a confirmation shortly.','success');
   cart = []; activePromo = null;
@@ -1830,7 +1785,31 @@ Time: ${new Date().toLocaleString()}
   setTimeout(() => navigate('shop'), 2000);
 }
 
-// Order notifications are recorded via Netlify Forms (see placeOrder).
+function sendOrderNotification(orderNum, message, customerName, customerEmail, total) {
+  // EmailJS template params — set these up in your EmailJS dashboard
+  const templateParams = {
+    to_email: 'cryonix.research@gmail.com',
+    reply_to: customerEmail,
+    subject: `New Order ${orderNum} — $${total.toFixed(2)} — Cryonix Research`,
+    order_number: orderNum,
+    customer_name: customerName,
+    customer_email: customerEmail,
+    message: message,
+    // SMS via EmailJS SMS template
+    to_number: '+17049414751',
+    sms_body: `CRYONIX ORDER ${orderNum} — $${total.toFixed(2)} from ${customerName}. Check email for details.`,
+  };
+
+  // Send email notification to you
+  emailjs.send('YOUR_SERVICE_ID', 'YOUR_ORDER_TEMPLATE_ID', templateParams)
+    .then(() => console.log('Order email sent'))
+    .catch(err => console.error('Email error:', err));
+
+  // Send SMS notification (requires EmailJS SMS service or Twilio template)
+  emailjs.send('YOUR_SERVICE_ID', 'YOUR_SMS_TEMPLATE_ID', templateParams)
+    .then(() => console.log('Order SMS sent'))
+    .catch(err => console.error('SMS error:', err));
+}
 
 
 // ── MOBILE NAV + SIDEBAR ──
@@ -1887,56 +1866,9 @@ window.addEventListener('scroll', () => {
   if (_stb) _stb.classList.toggle('visible', window.scrollY > 400);
 });
 // ═══════════════════════════════
-//  LIVE PRODUCTS FROM GOOGLE SHEET (edit the sheet, site updates in ~1-2 min)
-// ═══════════════════════════════
-const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTOVDkP0WwK7fOiaKw7i5pnFYJb9P5RBDkyZ9KMfXHOCQ7eGlD81BlXtvm3r0ArpVhnp8TjKlmH5_6O/pub?gid=0&single=true&output=csv";
-function parseCSV(text){
-  const rows=[]; let row=[], cur='', q=false;
-  for(let i=0;i<text.length;i++){
-    const c=text[i];
-    if(q){
-      if(c==='"'){ if(text[i+1]==='"'){cur+='"';i++;} else q=false; }
-      else cur+=c;
-    } else {
-      if(c==='"') q=true;
-      else if(c===',') { row.push(cur); cur=''; }
-      else if(c==='\n'){ row.push(cur); rows.push(row); row=[]; cur=''; }
-      else if(c==='\r'){}
-      else cur+=c;
-    }
-  }
-  if(cur!==''||row.length){ row.push(cur); rows.push(row); }
-  return rows;
-}
-async function loadProducts(){
-  try{
-    const res = await fetch(SHEET_CSV_URL + '&t=' + Date.now());
-    if(!res.ok) throw 0;
-    const rows = parseCSV(await res.text()).filter(r=>r.length>1 && r.some(c=>(c||'').trim()!==''));
-    if(rows.length<2) throw 0;
-    const headers = rows[0].map(h=>h.trim().toLowerCase());
-    const col = n => headers.indexOf(n);
-    const out=[];
-    for(let i=1;i<rows.length;i++){
-      const r=rows[i];
-      const get = n => { const j=col(n); return (j>=0 && r[j]!=null) ? r[j].trim() : ''; };
-      const nm=get('name'); if(!nm) continue;
-      const price=parseFloat(get('price'));
-      const orig=parseFloat(get('orig'));
-      let stock=get('stock').toLowerCase(); if(stock!=='low'&&stock!=='out') stock='in';
-      let badge=get('badge').toLowerCase(); if(['hot','new','sale','featured'].indexOf(badge)<0) badge='';
-      out.push({name:nm, mg:get('mg'), sub:get('sub'), price:isNaN(price)?0:price, orig:isNaN(orig)?null:orig, badge:badge, cat:get('cat')||'Other', desc:get('desc'), stock:stock});
-    }
-    if(out.length){ PRODUCTS.length=0; out.forEach(p=>PRODUCTS.push(p)); }
-  }catch(e){ /* keep the built-in fallback product list so the site never goes blank */ }
-  renderProducts();
-}
-
-// ═══════════════════════════════
 //  INIT
 // ═══════════════════════════════
 renderProducts();
-loadProducts();
 applyMobileLayout();
 updateMobileNav('shop');
 // Restore saved promo UI on load
@@ -1950,6 +1882,75 @@ if (activePromo) {
 }
 // Restore cart badge on load
 updateCartBadge();
+
+// ===== Cryonix: live Google Sheet products + storewide sale (added) =====
+// Paste your two published-CSV URLs below (Products tab + Settings tab).
+// Until set, these no-op and the hardcoded PRODUCTS list is used.
+var PRODUCTS_CSV_URL = "PASTE_YOUR_PUBLISHED_PRODUCTS_CSV_URL_HERE";
+var SETTINGS_CSV_URL = "PASTE_YOUR_PUBLISHED_SETTINGS_CSV_URL_HERE";
+
+function cxToNum(s){var n=parseFloat(String(s).replace(/[^0-9.]/g,""));return isNaN(n)?0:n;}
+function cxParseCsv(text){
+  var rows=[],row=[],field="",q=false;text=String(text).replace(/\r\n/g,"\n").replace(/\r/g,"\n");
+  for(var i=0;i<text.length;i++){var ch=text[i];
+    if(q){if(ch==='"'){if(text[i+1]==='"'){field+='"';i++;}else q=false;}else field+=ch;}
+    else{if(ch==='"')q=true;else if(ch===","){row.push(field);field="";}
+      else if(ch==="\n"){row.push(field);rows.push(row);row=[];field="";}else field+=ch;}}
+  if(field.length||row.length){row.push(field);rows.push(row);}
+  return rows.filter(function(r){return r.length&&!(r.length===1&&r[0]==="");});
+}
+function cxRerender(){
+  try{if(typeof renderProducts==="function")renderProducts();}catch(e){}
+  ["renderFeatured","renderHome","renderTrending"].forEach(function(fn){try{if(typeof window[fn]==="function")window[fn]();}catch(e){}});
+  try{var a=document.querySelector(".page-view.active");if(a&&a.id&&typeof navigate==="function"){var y=window.scrollY;navigate(a.id.replace("page-",""));window.scrollTo(0,y);}}catch(e){}
+}
+(function cxLoadProducts(){
+  if(!PRODUCTS_CSV_URL||PRODUCTS_CSV_URL.indexOf("http")!==0)return;
+  fetch(PRODUCTS_CSV_URL+(PRODUCTS_CSV_URL.indexOf("?")>-1?"&":"?")+"t="+Date.now())
+   .then(function(r){return r.ok?r.text():Promise.reject();})
+   .then(function(txt){
+    var rows=cxParseCsv(txt);if(!rows||rows.length<2)return;
+    var h=rows[0].map(function(x){return x.trim().toLowerCase();});
+    function ci(n){return h.indexOf(n);}
+    var col={name:ci("name"),mg:ci("mg"),sub:ci("sub"),price:ci("price"),orig:ci("orig"),desc:ci("desc"),badge:ci("badge"),cat:ci("cat"),stock:ci("stock"),featured:ci("featured")};
+    if(col.name===-1||col.price===-1)return;
+    var list=[];
+    for(var r=1;r<rows.length;r++){(function(row){
+      function g(c){return c>-1&&row[c]!=null?String(row[c]).trim():"";}
+      var name=g(col.name);if(!name)return;
+      var badge=g(col.badge).toLowerCase();if(badge==="none")badge="";
+      var fc=g(col.featured).toLowerCase();var featured=badge==="featured"||fc==="yes"||fc==="true"||fc==="1";
+      var stock=g(col.stock).toLowerCase();if(["in","low","out"].indexOf(stock)===-1)stock="in";
+      list.push({name:name,mg:g(col.mg),sub:g(col.sub),price:cxToNum(g(col.price)),orig:g(col.orig)?cxToNum(g(col.orig)):null,badge:badge,featured:featured,cat:g(col.cat),stock:stock,desc:g(col.desc)});
+    })(rows[r]);}
+    if(!list.length)return;
+    PRODUCTS.length=0;list.forEach(function(p){PRODUCTS.push(p);});
+    cxRerender();
+   }).catch(function(){});
+})();
+(function cxInitSale(){
+  if(!SETTINGS_CSV_URL||SETTINGS_CSV_URL.indexOf("http")!==0)return;
+  fetch(SETTINGS_CSV_URL+(SETTINGS_CSV_URL.indexOf("?")>-1?"&":"?")+"t="+Date.now())
+   .then(function(r){return r.ok?r.text():Promise.reject();})
+   .then(function(txt){
+    var s={};cxParseCsv(txt).forEach(function(r){if(r.length<2)return;var k=String(r[0]).trim().toLowerCase();var v=r.slice(1).join(",").trim();if(k&&k!=="key")s[k]=v;});
+    var active=String(s["sitewide_sale_active"]||"").toLowerCase()==="yes";
+    var pct=parseFloat(s["sitewide_discount_percent"]||"0");
+    var label=(s["sitewide_sale_label"]||(pct+"% off everything")).trim();
+    if(!active||!(pct>0))return;
+    if(typeof activePromo==="undefined"||!activePromo){activePromo={code:"SITEWIDE"+pct,type:"percent",value:pct,label:pct+"% off"};try{renderCartDrawer();}catch(e){}try{saveCart();}catch(e){}}
+    cxShowSaleBanner(label);
+   }).catch(function(){});
+})();
+function cxShowSaleBanner(label){
+  try{if(sessionStorage.getItem("cx_sale_dismissed")==="1")return;}catch(e){}
+  if(document.getElementById("cxSaleBanner"))return;
+  var bar=document.createElement("div");bar.id="cxSaleBanner";
+  bar.style.cssText="background:linear-gradient(90deg,#0d5fcf,#031c3d);color:#fff;font:600 13.5px/1.4 -apple-system,Segoe UI,Roboto,sans-serif;padding:9px 40px 9px 16px;text-align:center;position:relative;z-index:400;";
+  bar.innerHTML="🎉 "+String(label).replace(/</g,"&lt;")+" — applied automatically at checkout.<button aria-label='Dismiss' style='position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:#cfe2ff;font-size:18px;cursor:pointer;line-height:1;'>&times;</button>";
+  var b=bar.querySelector("button");if(b)b.onclick=function(){try{sessionStorage.setItem("cx_sale_dismissed","1");}catch(e){}bar.remove();};
+  document.body.insertBefore(bar,document.body.firstChild);
+}
 </script>
 
 
