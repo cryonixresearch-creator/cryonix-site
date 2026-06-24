@@ -1527,15 +1527,18 @@ function renderProducts() {
   grid.innerHTML = '';
   filtered.forEach((p) => {
     const idx = PRODUCTS.indexOf(p);
-    const status = p.stock || 'in';
+    const status = (p.stock || 'in').toLowerCase();
     const inStock = status !== 'out';
-    const featuredBadge = '<span class="badge badge-featured">Featured</span>';
-    const mainBadge = status==='out' ? '<span class="badge badge-oos">Out of Stock</span>'
-      : status==='low' ? '<span class="badge badge-low">Low Stock</span>'
-      : p.badge==='sale'?'<span class="badge badge-sale">Sale</span>'
-      : p.badge==='new'?'<span class="badge badge-new">New</span>'
-      : p.badge==='hot'?'<span class="badge badge-hot">Hot</span>':'';
-    const badge = mainBadge || featuredBadge;
+    let badge = '';
+    if (status === 'out') badge = '<span class="badge badge-oos">Out of Stock</span>';
+    else if (status === 'low') badge = '<span class="badge badge-low">Low Stock</span>';
+    else {
+      const b = (p.badge || '').toLowerCase();
+      if (b === 'hot') badge = '<span class="badge badge-hot">Hot</span>';
+      else if (b === 'new') badge = '<span class="badge badge-new">New</span>';
+      else if (b === 'sale') badge = '<span class="badge badge-sale">Sale</span>';
+      else if (b === 'featured') badge = '<span class="badge badge-featured">Featured</span>';
+    }
     const oosOverlay = !inStock ? '<div class="oos-overlay"><span class="oos-label">Out of Stock</span></div>' : '';
     const priceHtml = p.orig
       ? `<span class="price-orig">$${p.orig.toFixed(2)}</span><span class="price-now">$${p.price.toFixed(2)}</span>`
@@ -1884,9 +1887,56 @@ window.addEventListener('scroll', () => {
   if (_stb) _stb.classList.toggle('visible', window.scrollY > 400);
 });
 // ═══════════════════════════════
+//  LIVE PRODUCTS FROM GOOGLE SHEET (edit the sheet, site updates in ~1-2 min)
+// ═══════════════════════════════
+const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTOVDkP0WwK7fOiaKw7i5pnFYJb9P5RBDkyZ9KMfXHOCQ7eGlD81BlXtvm3r0ArpVhnp8TjKlmH5_6O/pub?gid=0&single=true&output=csv";
+function parseCSV(text){
+  const rows=[]; let row=[], cur='', q=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(q){
+      if(c==='"'){ if(text[i+1]==='"'){cur+='"';i++;} else q=false; }
+      else cur+=c;
+    } else {
+      if(c==='"') q=true;
+      else if(c===',') { row.push(cur); cur=''; }
+      else if(c==='\n'){ row.push(cur); rows.push(row); row=[]; cur=''; }
+      else if(c==='\r'){}
+      else cur+=c;
+    }
+  }
+  if(cur!==''||row.length){ row.push(cur); rows.push(row); }
+  return rows;
+}
+async function loadProducts(){
+  try{
+    const res = await fetch(SHEET_CSV_URL + '&t=' + Date.now());
+    if(!res.ok) throw 0;
+    const rows = parseCSV(await res.text()).filter(r=>r.length>1 && r.some(c=>(c||'').trim()!==''));
+    if(rows.length<2) throw 0;
+    const headers = rows[0].map(h=>h.trim().toLowerCase());
+    const col = n => headers.indexOf(n);
+    const out=[];
+    for(let i=1;i<rows.length;i++){
+      const r=rows[i];
+      const get = n => { const j=col(n); return (j>=0 && r[j]!=null) ? r[j].trim() : ''; };
+      const nm=get('name'); if(!nm) continue;
+      const price=parseFloat(get('price'));
+      const orig=parseFloat(get('orig'));
+      let stock=get('stock').toLowerCase(); if(stock!=='low'&&stock!=='out') stock='in';
+      let badge=get('badge').toLowerCase(); if(['hot','new','sale','featured'].indexOf(badge)<0) badge='';
+      out.push({name:nm, mg:get('mg'), sub:get('sub'), price:isNaN(price)?0:price, orig:isNaN(orig)?null:orig, badge:badge, cat:get('cat')||'Other', desc:get('desc'), stock:stock});
+    }
+    if(out.length){ PRODUCTS.length=0; out.forEach(p=>PRODUCTS.push(p)); }
+  }catch(e){ /* keep the built-in fallback product list so the site never goes blank */ }
+  renderProducts();
+}
+
+// ═══════════════════════════════
 //  INIT
 // ═══════════════════════════════
 renderProducts();
+loadProducts();
 applyMobileLayout();
 updateMobileNav('shop');
 // Restore saved promo UI on load
