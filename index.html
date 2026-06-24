@@ -15,15 +15,7 @@
 <meta name="twitter:description" content="USA-manufactured, third-party verified research peptides. ≥99% purity guaranteed."/>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%23031c3d'/><circle cx='50' cy='50' r='18' fill='none' stroke='%234fa3f7' stroke-width='6'/><line x1='50' y1='20' x2='50' y2='32' stroke='%234fa3f7' stroke-width='6' stroke-linecap='round'/><line x1='50' y1='68' x2='50' y2='80' stroke='%234fa3f7' stroke-width='6' stroke-linecap='round'/><line x1='20' y1='50' x2='32' y2='50' stroke='%234fa3f7' stroke-width='6' stroke-linecap='round'/><line x1='68' y1='50' x2='80' y2='50' stroke='%234fa3f7' stroke-width='6' stroke-linecap='round'/></svg>" type="image/svg+xml"/>
 <link rel="canonical" href="https://cryonixresearch.com"/>
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script>
-  // EmailJS init — replace "YOUR_PUBLIC_KEY" with your EmailJS public key before going live
-  try {
-    if (typeof emailjs !== 'undefined' && 'YOUR_PUBLIC_KEY' !== 'YOUR_PUBLIC_KEY') {
-      emailjs.init("YOUR_PUBLIC_KEY");
-    }
-  } catch(e) { console.warn('EmailJS not initialized:', e); }
-</script>
+<!-- Notifications handled server-side via Netlify Forms - no third-party keys in page source -->
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,400;1,500&display=swap" rel="stylesheet"/>
@@ -247,6 +239,7 @@ nav a:hover,nav a.active{background:var(--sky);color:var(--blue)}
 .badge-sale{background:#fde8e8;color:var(--red)}
 .badge-new{background:#e0f5ed;color:var(--green)}
 .badge-hot{background:#fff3e0;color:#a34500}
+.badge-low{background:#fff4d6;color:#9a6700}
 .mg-pill{position:absolute;bottom:10px;right:10px;background:rgba(5,42,90,.78);color:#a8cff5;font-size:10px;font-weight:600;letter-spacing:.04em;padding:3px 8px;border-radius:100px}
 .product-body{padding:14px 15px 15px;flex:1;display:flex;flex-direction:column}
 .product-name{font-family:var(--font-head);font-size:15px;font-weight:400;color:var(--text-dark);margin-bottom:4px;line-height:1.25}
@@ -472,28 +465,6 @@ footer{background:var(--navy2);color:#6895c4;padding:48px 24px 28px}
 .btn-add.oos:hover{background:#9ca3af}
 .oos-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(3,28,61,.18)}
 .oos-label{background:rgba(3,28,61,.82);color:#fff;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:5px 14px;border-radius:100px}
-
-/* LOW STOCK */
-.product-card.low-stock{border-color:#f59e0b}
-.product-card.low-stock .product-img{border-bottom:2px solid #f59e0b}
-.badge-low{background:#fff7ed;color:#b45309;border:1px solid #fcd34d}
-.btn-add.low{background:#b45309}
-.btn-add.low:hover{background:#92400e}
-.low-stock-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(120,53,15,.10)}
-.low-stock-label{background:rgba(180,83,9,.88);color:#fff;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:5px 14px;border-radius:100px}
-/* sidebar blob pulse for low stock */
-.filter-btn.low-stock-alert{border-color:#f59e0b;color:#b45309}
-.filter-btn.low-stock-alert .filter-count{background:#fff7ed;color:#b45309;border:1px solid #fcd34d}
-.low-dot{display:inline-block;width:8px;height:8px;background:#f59e0b;border-radius:50%;margin-right:6px;animation:lowPulse 1.8s ease-in-out infinite;flex-shrink:0}
-@keyframes lowPulse{0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,.5)}50%{box-shadow:0 0 0 5px rgba(245,158,11,.0)}}
-
-/* loading skeleton */
-.skeleton-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;min-height:260px}
-.skeleton-img{height:165px;background:linear-gradient(90deg,#e8f0f8 25%,#d0e4f7 50%,#e8f0f8 75%);background-size:200% 100%;animation:shimmer 1.4s infinite}
-.skeleton-body{padding:14px 15px}
-.skeleton-line{height:12px;border-radius:6px;background:linear-gradient(90deg,#e8f0f8 25%,#d0e4f7 50%,#e8f0f8 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;margin-bottom:8px}
-.skeleton-line.short{width:55%}
-@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 </style>
 </head>
 <body>
@@ -517,16 +488,54 @@ footer{background:var(--navy2);color:#6895c4;padding:48px 24px 28px}
   <input name="bot-field"/>
 </form>
 
+<!-- NETLIFY FORM DETECTION: entry-gate signups -->
+<form name="gate-signup" data-netlify="true" netlify-honeypot="bot-field" hidden>
+  <input type="email" name="email"/>
+  <input type="text" name="company"/>
+  <input type="text" name="age-confirmed"/>
+  <input type="text" name="newsletter-optin"/>
+  <input type="text" name="timestamp"/>
+  <input name="bot-field"/>
+</form>
+
+<!-- NETLIFY FORM DETECTION: orders -->
+<form name="order" data-netlify="true" netlify-honeypot="bot-field" hidden>
+  <input type="text" name="order-number"/>
+  <input type="text" name="customer-name"/>
+  <input type="email" name="email"/>
+  <input type="text" name="address"/>
+  <input type="text" name="items"/>
+  <input type="text" name="total"/>
+  <input type="text" name="promo"/>
+  <input type="text" name="timestamp"/>
+  <input name="bot-field"/>
+</form>
+
 <!-- AGE GATE -->
 <div class="age-gate-wrap" id="ageGate">
   <div class="age-gate">
     <div class="age-gate-logo">Cryonix<span style="color:var(--blue)">.</span></div>
     <h2>For Research Use Only</h2>
-    <p>All products sold by Cryonix Research are strictly for <strong>in-vitro research and laboratory purposes only</strong>. You must be 18+ and a licensed research professional to continue.</p>
-    <div class="age-btns">
-      <button class="btn-age-yes" id="ageYes">I Confirm — Enter</button>
-      <button class="btn-age-no" onclick="window.location.href='https://google.com'">Exit</button>
-    </div>
+    <p>All products are sold strictly for <strong>in-vitro research and laboratory use</strong>. Enter your details to continue.</p>
+    <form id="gateForm" onsubmit="submitGate(event)" style="text-align:left;margin-top:6px">
+      <div class="form-group" style="margin-bottom:12px">
+        <label class="form-label">Work Email</label>
+        <input type="email" class="form-input" id="gateEmail" placeholder="you@institution.edu" required/>
+      </div>
+      <div class="form-group" style="margin-bottom:12px">
+        <label class="form-label">Company / Institution</label>
+        <input type="text" class="form-input" id="gateCompany" placeholder="e.g. Smith Research Lab" required/>
+      </div>
+      <label style="display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:var(--text-mid);margin-bottom:11px;cursor:pointer">
+        <input type="checkbox" id="gateAge" style="margin-top:3px;flex-shrink:0" required/>
+        <span>I confirm I am 21 years of age or older and accessing this site as a research professional.</span>
+      </label>
+      <label style="display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:var(--text-mid);margin-bottom:18px;cursor:pointer">
+        <input type="checkbox" id="gateNews" style="margin-top:3px;flex-shrink:0"/>
+        <span>Email me product updates, restock alerts, and offers.</span>
+      </label>
+      <button type="submit" class="btn-age-yes" style="width:100%">Enter Site &#8594;</button>
+    </form>
     <p class="age-fine">By entering you confirm you are accessing this site for lawful research purposes only. Not intended to diagnose, treat, cure, or prevent any disease.</p>
   </div>
 </div>
@@ -1010,80 +1019,35 @@ footer{background:var(--navy2);color:#6895c4;padding:48px 24px 28px}
 // ═══════════════════════════════
 //  DATA
 // ═══════════════════════════════
-// ═══════════════════════════════
-//  DATA — loaded from Google Sheets via Netlify Function
-//  Falls back to hardcoded list if the function is unavailable
-// ═══════════════════════════════
-const PRODUCTS_FALLBACK = [
-  {name:'Tirzepatide',mg:'5 mg',sub:'Dual GIP/GLP-1 receptor agonist',price:34.99,orig:null,badge:'hot',cat:'Metabolic',desc:'Tirzepatide is a dual GIP and GLP-1 receptor agonist of significant interest in metabolic and glycemic control research, studied extensively in preclinical and clinical models.',stock:'in'},
-  {name:'Semaglutide',mg:'5 mg',sub:'GLP-1 receptor agonist',price:29.99,orig:null,badge:'hot',cat:'Metabolic',desc:'Semaglutide is a GLP-1 receptor agonist widely studied in metabolic research models. Research focuses on glycemic regulation, energy homeostasis, and appetite signaling pathways.',stock:'in'},
-  {name:'Retatrutide',mg:'5 mg',sub:'Triple GLP-1/GIP/glucagon receptor agonist',price:44.99,orig:null,badge:'new',cat:'Metabolic',desc:'Retatrutide is a triagonist peptide targeting GLP-1, GIP, and glucagon receptors simultaneously — an emerging research compound for energy homeostasis and metabolic studies.',stock:'in'},
-  {name:'Cagrilintide',mg:'5 mg',sub:'Long-acting amylin analogue',price:59.99,orig:null,badge:'new',cat:'Metabolic',desc:'Cagrilintide is a long-acting amylin analogue studied in combination metabolic research protocols, with interest in appetite regulation and glycemic control signaling.',stock:'in'},
-  {name:'MOTS-c',mg:'10 mg',sub:'Mitochondria-derived peptide',price:49.99,orig:null,badge:'',cat:'Metabolic',desc:'MOTS-c is a mitochondria-derived peptide studied for roles in metabolic homeostasis, glucose regulation, insulin sensitivity, and exercise-mimicking effects in cellular models.',stock:'in'},
-  {name:'BPC-157',mg:'5 mg',sub:'Body protection compound',price:29.99,orig:null,badge:'',cat:'Recovery & Repair',desc:'BPC-157 is a pentadecapeptide extensively studied for tissue repair, gut healing, and anti-inflammatory mechanisms in preclinical research models.',stock:'in'},
-  {name:'TB-500',mg:'5 mg',sub:'Thymosin beta-4 research peptide',price:44.99,orig:null,badge:'',cat:'Recovery & Repair',desc:'TB-500 is a synthetic fragment of Thymosin Beta-4, researched for roles in actin regulation, cellular migration, angiogenesis, and wound healing processes.',stock:'in'},
-  {name:'Tesamorelin',mg:'5 mg',sub:'GHRH analogue — lipodystrophy research',price:64.99,orig:null,badge:'',cat:'Growth Factors',desc:'Tesamorelin is a synthetic GHRH analogue studied in models of visceral adiposity and metabolic dysfunction, noted for IGF-1 stimulation and body composition changes in research contexts.',stock:'in'},
-  {name:'BPC-157 / TB-500 Blend',mg:'5 mg / 5 mg',sub:'Recovery & tissue repair dual blend',price:54.99,orig:null,badge:'sale',cat:'Blends',desc:'A research blend combining BPC-157 and TB-500, two peptides independently studied for tissue repair mechanisms, angiogenesis, and recovery signaling in in-vitro models.',stock:'in'},
-  {name:'CJC-1295 + Ipamorelin',mg:'5 mg / 5 mg',sub:'Dual GH-axis research blend',price:59.99,orig:null,badge:'',cat:'Blends',desc:'A synergistic blend of CJC-1295 (GHRH analogue) and Ipamorelin (GHRP) studied in combination for complementary roles in GH pulse amplitude and IGF-1 modulation.',stock:'in'},
-  {name:'CJC-1295 No DAC',mg:'5 mg',sub:'Short-acting GHRH analogue',price:39.99,orig:null,badge:'',cat:'Blends',desc:'CJC-1295 without DAC (Drug Affinity Complex) is a modified GHRH analogue with a shorter half-life, studied for pulsatile GH release patterns in research models.',stock:'in'},
-  {name:'Epithalon',mg:'10 mg',sub:'Tetrapeptide longevity compound',price:34.99,orig:null,badge:'',cat:'Anti-Aging',desc:'Epithalon (Epitalon) is a tetrapeptide researched for effects on telomerase activity, circadian rhythm regulation, and longevity-associated gene expression.',stock:'in'},
-  {name:'NAD+',mg:'100 mg',sub:'Nicotinamide adenine dinucleotide',price:24.99,orig:null,badge:'',cat:'Anti-Aging',desc:'NAD+ is a critical coenzyme in cellular energy metabolism. Research focuses on sirtuin activation, DNA repair, mitochondrial function, and aging-related pathways.',stock:'in'},
-  {name:'Bacteriostatic Water',mg:'30 mL',sub:'Sterile bacteriostatic water',price:14.99,orig:null,badge:'',cat:'Research Water',desc:'Sterile bacteriostatic water containing 0.9% benzyl alcohol, intended for reconstitution of lyophilized research peptides. Multi-dose compatible.',stock:'in'},
+const PRODUCTS = [
+  // -----------------------------------------------------------------
+  //  STOCK / INVENTORY - set "stock" on any product to:
+  //    'in'  = available (normal)
+  //    'low' = shows an amber "Low Stock" badge, still buyable
+  //    'out' = shows "Out of Stock", greys it out, disables Add to Cart
+  //  To restock or change a price, edit the product line and re-deploy.
+  // -----------------------------------------------------------------
+  // Metabolic (5)
+  {name:'Tirzepatide',mg:'5 mg',sub:'Dual GIP/GLP-1 receptor agonist',price:34.99,orig:null,badge:'hot',featured:true,cat:'Metabolic',stock:'in',desc:'Tirzepatide is a dual GIP and GLP-1 receptor agonist of significant interest in metabolic and glycemic control research, studied extensively in preclinical and clinical models.'},
+  {name:'Semaglutide',mg:'5 mg',sub:'GLP-1 receptor agonist',price:29.99,orig:null,badge:'hot',featured:true,cat:'Metabolic',stock:'in',desc:'Semaglutide is a GLP-1 receptor agonist widely studied in metabolic research models. Research focuses on glycemic regulation, energy homeostasis, and appetite signaling pathways.'},
+  {name:'Retatrutide',mg:'5 mg',sub:'Triple GLP-1/GIP/glucagon receptor agonist',price:44.99,orig:null,badge:'new',featured:true,cat:'Metabolic',stock:'in',desc:'Retatrutide is a triagonist peptide targeting GLP-1, GIP, and glucagon receptors simultaneously — an emerging research compound for energy homeostasis and metabolic studies.'},
+  {name:'Cagrilintide',mg:'5 mg',sub:'Long-acting amylin analogue',price:59.99,orig:null,badge:'new',featured:true,cat:'Metabolic',stock:'in',desc:'Cagrilintide is a long-acting amylin analogue studied in combination metabolic research protocols, with interest in appetite regulation and glycemic control signaling.'},
+  {name:'MOTS-c',mg:'10 mg',sub:'Mitochondria-derived peptide',price:49.99,orig:null,badge:'',cat:'Metabolic',stock:'in',desc:'MOTS-c is a mitochondria-derived peptide studied for roles in metabolic homeostasis, glucose regulation, insulin sensitivity, and exercise-mimicking effects in cellular models.'},
+  // Recovery & Repair (2)
+  {name:'BPC-157',mg:'5 mg',sub:'Body protection compound',price:29.99,orig:null,badge:'',cat:'Recovery & Repair',stock:'in',desc:'BPC-157 is a pentadecapeptide extensively studied for tissue repair, gut healing, and anti-inflammatory mechanisms in preclinical research models.'},
+  {name:'TB-500',mg:'5 mg',sub:'Thymosin beta-4 research peptide',price:44.99,orig:null,badge:'',cat:'Recovery & Repair',stock:'in',desc:'TB-500 is a synthetic fragment of Thymosin Beta-4, researched for roles in actin regulation, cellular migration, angiogenesis, and wound healing processes.'},
+  // Growth Factors (1)
+  {name:'Tesamorelin',mg:'5 mg',sub:'GHRH analogue — lipodystrophy research',price:64.99,orig:null,badge:'',cat:'Growth Factors',stock:'in',desc:'Tesamorelin is a synthetic GHRH analogue studied in models of visceral adiposity and metabolic dysfunction, noted for IGF-1 stimulation and body composition changes in research contexts.'},
+  // Blends (3)
+  {name:'BPC-157 / TB-500 Blend',mg:'5 mg / 5 mg',sub:'Recovery & tissue repair dual blend',price:54.99,orig:null,badge:'sale',cat:'Blends',stock:'in',desc:'A research blend combining BPC-157 and TB-500, two peptides independently studied for tissue repair mechanisms, angiogenesis, and recovery signaling in in-vitro models.'},
+  {name:'CJC-1295 + Ipamorelin',mg:'5 mg / 5 mg',sub:'Dual GH-axis research blend',price:59.99,orig:null,badge:'',cat:'Blends',stock:'in',desc:'A synergistic blend of CJC-1295 (GHRH analogue) and Ipamorelin (GHRP) studied in combination for complementary roles in GH pulse amplitude and IGF-1 modulation.'},
+  {name:'CJC-1295 No DAC',mg:'5 mg',sub:'Short-acting GHRH analogue',price:39.99,orig:null,badge:'',cat:'Blends',stock:'in',desc:'CJC-1295 without DAC (Drug Affinity Complex) is a modified GHRH analogue with a shorter half-life, studied for pulsatile GH release patterns in research models.'},
+  // Anti-Aging (2)
+  {name:'Epithalon',mg:'10 mg',sub:'Tetrapeptide longevity compound',price:34.99,orig:null,badge:'',cat:'Anti-Aging',stock:'in',desc:'Epithalon (Epitalon) is a tetrapeptide researched for effects on telomerase activity, circadian rhythm regulation, and longevity-associated gene expression.'},
+  {name:'NAD+',mg:'100 mg',sub:'Nicotinamide adenine dinucleotide',price:24.99,orig:null,badge:'',cat:'Anti-Aging',stock:'in',desc:'NAD+ is a critical coenzyme in cellular energy metabolism. Research focuses on sirtuin activation, DNA repair, mitochondrial function, and aging-related pathways.'},
+  // Research Water (1)
+  {name:'Bacteriostatic Water',mg:'30 mL',sub:'Sterile bacteriostatic water',price:14.99,orig:null,badge:'',cat:'Research Water',stock:'in',desc:'Sterile bacteriostatic water containing 0.9% benzyl alcohol, intended for reconstitution of lyophilized research peptides. Multi-dose compatible.'},
 ];
-
-let PRODUCTS = [...PRODUCTS_FALLBACK];
-
-async function loadProducts() {
-  // Show skeleton cards while loading
-  const grid = document.getElementById('productGrid');
-  if (grid) {
-    grid.innerHTML = Array(6).fill(`
-      <div class="skeleton-card">
-        <div class="skeleton-img"></div>
-        <div class="skeleton-body">
-          <div class="skeleton-line" style="width:70%"></div>
-          <div class="skeleton-line short"></div>
-          <div class="skeleton-line" style="width:40%"></div>
-        </div>
-      </div>`).join('');
-  }
-
-  try {
-    const res = await fetch('/.netlify/functions/get-products');
-    if (!res.ok) throw new Error('fetch failed');
-    const data = await res.json();
-    if (Array.isArray(data) && data.length > 0) {
-      PRODUCTS = data;
-    }
-  } catch {
-    // silently fall back to hardcoded list
-    PRODUCTS = [...PRODUCTS_FALLBACK];
-  }
-
-  renderProducts();
-  updateSidebarStockAlerts();
-}
-
-function updateSidebarStockAlerts() {
-  // Mark category filter buttons that have at least one low-stock item
-  const lowCats = new Set(PRODUCTS.filter(p => p.stock === 'low').map(p => p.cat));
-  document.querySelectorAll('.filter-btn').forEach(btn => {
-    const cat = btn.dataset.cat;
-    const hasLow = cat === 'All Products'
-      ? PRODUCTS.some(p => p.stock === 'low')
-      : lowCats.has(cat);
-    btn.classList.toggle('low-stock-alert', hasLow);
-    // Add/remove the pulsing orange dot
-    const existingDot = btn.querySelector('.low-dot');
-    if (hasLow && !existingDot) {
-      const dot = document.createElement('span');
-      dot.className = 'low-dot';
-      btn.prepend(dot);
-    } else if (!hasLow && existingDot) {
-      existingDot.remove();
-    }
-  });
-}
 
 const FAQS = [
   {q:'Are your products safe for human use?',a:'No. All Cryonix products are strictly for in-vitro laboratory research only and are not intended for human or animal consumption. They have not been evaluated by the FDA for safety or efficacy in humans.'},
@@ -1135,13 +1099,32 @@ function saveCart() {
 // ═══════════════════════════════
 //  AGE GATE
 // ═══════════════════════════════
-document.getElementById('ageYes').onclick = () => {
-  const _ag = document.getElementById('ageGate'); if(_ag) _ag.style.display = 'none';
-  try { sessionStorage.setItem('cryonix_age_ok','1'); } catch(e) {}
-};
-// Hide age gate if already confirmed this session
+// ENTRY GATE - collects email, company, age confirmation + newsletter consent
+function submitGate(e) {
+  e.preventDefault();
+  const email = document.getElementById('gateEmail').value.trim();
+  const company = document.getElementById('gateCompany').value.trim();
+  const ageOk = document.getElementById('gateAge').checked;
+  const news = document.getElementById('gateNews').checked;
+  if (!email || !email.includes('@')) { toast('Please enter a valid email','error'); return; }
+  if (!company) { toast('Please enter your company or institution','error'); return; }
+  if (!ageOk) { toast('You must confirm you are 21 or older','error'); return; }
+  const enc = new URLSearchParams();
+  enc.append('form-name','gate-signup');
+  enc.append('email', email);
+  enc.append('company', company);
+  enc.append('age-confirmed','yes');
+  enc.append('newsletter-optin', news ? 'yes' : 'no');
+  enc.append('timestamp', new Date().toLocaleString());
+  fetch('/', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: enc.toString()}).catch(()=>{});
+  try {
+    sessionStorage.setItem('cryonix_gate_ok','1');
+    localStorage.setItem('cryonix_lead', JSON.stringify({email, company, news}));
+  } catch(e){}
+  const ag = document.getElementById('ageGate'); if(ag) ag.style.display='none';
+}
 try {
-  if (sessionStorage.getItem('cryonix_age_ok') === '1') {
+  if (sessionStorage.getItem('cryonix_gate_ok') === '1') {
     const _ag = document.getElementById('ageGate'); if(_ag) _ag.style.display = 'none';
   }
 } catch(e) {}
@@ -1164,7 +1147,7 @@ function navigate(page) {
   const aside = document.querySelector('aside');
   if (aside && isSmallScreen()) aside.classList.remove('mobile-open');
   window.scrollTo({top:0, behavior:'smooth'});
-  if (page === 'shop') loadProducts();
+  if (page === 'shop') renderProducts();
   if (page === 'coa') renderCOA();
   if (page === 'faq') renderFAQ();
   if (page === 'checkout') renderCheckout();
@@ -1218,50 +1201,43 @@ function flyToCart(originEl) {
 
 // ═══════════════════════════════
 //  PROMO / AFFILIATE CODES
-//  Codes are validated server-side — never exposed in source.
 // ═══════════════════════════════
+// Promo / affiliate codes are validated SERVER-SIDE in netlify/functions/validate-promo.js
+// They are intentionally NOT stored in this page, so visitors cannot read or forge them.
+
 let activePromo = null;
 
 async function applyPromo() {
   const raw = document.getElementById('promoInput').value.trim().toUpperCase();
   const input = document.getElementById('promoInput');
-  const btn = document.querySelector('.btn-promo');
+  const msg = document.getElementById('promoMsg');
   if (!raw) { showPromoMsg('Please enter a code','invalid'); return; }
-
-  btn.textContent = '…';
-  btn.disabled = true;
-
+  let promo = null;
   try {
     const res = await fetch('/.netlify/functions/validate-promo', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({code: raw}),
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({code: raw})
     });
     const data = await res.json();
-
-    if (!data.valid) {
-      input.className = 'promo-input invalid';
-      showPromoMsg('Invalid code. Please try again.','invalid');
-      btn.textContent = 'Apply'; btn.disabled = false;
-      return;
-    }
-
-    activePromo = {code: raw, type: data.type, value: data.value, label: data.label};
-    input.className = 'promo-input valid';
-    showPromoMsg(`${data.label} applied!`, 'valid');
-    setTimeout(() => {
-      const _piw = document.getElementById('promoInputWrap'); if(_piw) _piw.style.display = 'none';
-      const _ptw = document.getElementById('promoTagWrap'); if(_ptw) _ptw.style.display = 'block';
-      document.getElementById('promoTagCode').textContent = raw + ' — ' + data.label;
-      document.getElementById('promoMsg').style.display = 'none';
-    }, 800);
-    renderCartDrawer();
-    saveCart();
-    toast(data.label + ' discount applied!', 'success');
-  } catch {
-    showPromoMsg('Could not verify code. Try again.','invalid');
+    if (data && data.ok) promo = {type:data.type, value:data.value, label:data.label};
+  } catch(err) { /* offline or function unavailable */ }
+  if (!promo) {
+    input.className = 'promo-input invalid';
+    showPromoMsg('Invalid code. Please try again.','invalid');
+    return;
   }
-  btn.textContent = 'Apply'; btn.disabled = false;
+  activePromo = {code: raw, ...promo};
+  input.className = 'promo-input valid';
+  showPromoMsg(`${promo.label} applied!`, 'valid');
+  setTimeout(() => {
+    const _piw = document.getElementById('promoInputWrap'); if(_piw) _piw.style.display = 'none';
+    const _ptw = document.getElementById('promoTagWrap'); if(_ptw) _ptw.style.display = 'block';
+    document.getElementById('promoTagCode').textContent = raw + ' - ' + promo.value + '% off';
+    msg.style.display = 'none';
+  }, 800);
+  renderCartDrawer();
+  saveCart();
+  toast(promo.value + '% discount applied!', 'success');
 }
 
 function removePromo() {
@@ -1446,7 +1422,7 @@ function openModal(idx) {
   document.getElementById('mOrig').textContent = p.orig ? '$' + p.orig.toFixed(2) : '';
   document.getElementById('mDesc').textContent = p.desc;
   const inCart = cart.find(c => c.idx === idx);
-  const inStock = p.stock !== false;
+  const inStock = p.stock !== 'out';
   const btn = document.getElementById('mCartBtn');
   if (!inStock) {
     btn.className = 'btn-modal-add';
@@ -1551,42 +1527,33 @@ function renderProducts() {
   grid.innerHTML = '';
   filtered.forEach((p) => {
     const idx = PRODUCTS.indexOf(p);
-    const isOos = p.stock === 'out' || p.stock === false;
-    const isLow = p.stock === 'low';
-    const inStock = !isOos;
-
-    const stockBadge = isOos  ? '<span class="badge badge-oos">Out of Stock</span>'
-                     : isLow  ? '<span class="badge badge-low">Low Stock</span>'
-                     : p.badge === 'sale' ? '<span class="badge badge-sale">Sale</span>'
-                     : p.badge === 'new'  ? '<span class="badge badge-new">New</span>'
-                     : p.badge === 'hot'  ? '<span class="badge badge-hot">Hot</span>'
-                     : '<span class="badge badge-featured">Featured</span>';
-
-    const overlay = isOos ? '<div class="oos-overlay"><span class="oos-label">Out of Stock</span></div>'
-                  : isLow ? '<div class="low-stock-overlay"><span class="low-stock-label">Low Stock</span></div>'
-                  : '';
-
-    const cardClass = isOos ? 'product-card oos' : isLow ? 'product-card low-stock' : 'product-card';
-    const btnClass  = isOos ? 'btn-add oos' : isLow ? 'btn-add low' : 'btn-add';
-
+    const status = p.stock || 'in';
+    const inStock = status !== 'out';
+    const featuredBadge = '<span class="badge badge-featured">Featured</span>';
+    const mainBadge = status==='out' ? '<span class="badge badge-oos">Out of Stock</span>'
+      : status==='low' ? '<span class="badge badge-low">Low Stock</span>'
+      : p.badge==='sale'?'<span class="badge badge-sale">Sale</span>'
+      : p.badge==='new'?'<span class="badge badge-new">New</span>'
+      : p.badge==='hot'?'<span class="badge badge-hot">Hot</span>':'';
+    const badge = mainBadge || featuredBadge;
+    const oosOverlay = !inStock ? '<div class="oos-overlay"><span class="oos-label">Out of Stock</span></div>' : '';
     const priceHtml = p.orig
       ? `<span class="price-orig">$${p.orig.toFixed(2)}</span><span class="price-now">$${p.price.toFixed(2)}</span>`
       : `<span class="price-now">$${p.price.toFixed(2)}</span>`;
-
     grid.innerHTML += `
-      <div class="${cardClass}" onclick="openModal(${idx})">
+      <div class="product-card${!inStock?' oos':''}" onclick="openModal(${idx})">
         <div class="product-img">
-          ${SVGS[idx % SVGS.length]}${stockBadge}
+          ${SVGS[idx%SVGS.length]}${badge}
           <span class="mg-pill">${p.mg}</span>
-          ${overlay}
+          ${oosOverlay}
         </div>
         <div class="product-body">
           <div class="product-name">${p.name}</div>
           <div class="product-sub">${p.sub}</div>
           <div class="product-price">${priceHtml}</div>
-          <button class="${btnClass}" id="addbtn-${idx}"
+          <button class="btn-add${!inStock?' oos':''}" id="addbtn-${idx}"
             ${inStock ? `onclick="event.stopPropagation();addToCart(${idx},this)"` : 'onclick="event.stopPropagation()" disabled'}
-          >${inStock ? `<span class="btn-icon">+</span><span>Add to Cart</span>` : `<span>${isOos ? 'Out of Stock' : 'Low Stock'}</span>`}</button>
+          >${inStock ? `<span class="btn-icon">+</span><span>Add to Cart</span>` : `<span>Out of Stock</span>`}</button>
         </div>
       </div>`;
   });
@@ -1752,12 +1719,6 @@ function handleContactSubmit(e) {
     form.style.display = 'none';
     const _cs = document.getElementById('contactSuccess'); if(_cs) _cs.style.display = 'block';
     toast('Message sent! We\'ll reply within 1 business day.','success');
-
-    // Also fire EmailJS SMS notification to your phone
-    emailjs.send('YOUR_SERVICE_ID', 'YOUR_SMS_TEMPLATE_ID', {
-      to_number: '+17049414751',
-      sms_body: `CRYONIX CONTACT from ${fullName} (${email}): ${subject}. Check Gmail for full message.`,
-    }).catch(err => console.log('SMS note:', err));
   })
   .catch(() => {
     toast('Something went wrong. Please try again.','error');
@@ -1844,8 +1805,19 @@ Time: ${new Date().toLocaleString()}
   const customerInfo = `Customer: ${fname} ${lname}\nEmail: ${email}\nShip to: ${address}, ${city}, ${state} ${zip}`;
   const fullMessage = `NEW ORDER — CRYONIX RESEARCH\n\n${customerInfo}\n\n${orderSummary}`;
 
-  // Send via EmailJS
-  sendOrderNotification(orderNum, fullMessage, fname + ' ' + lname, email, total);
+  // Record order server-side via Netlify Forms (appears in your Netlify dashboard).
+  // Replace with a real payment + fulfillment flow before going live.
+  const _ord = new URLSearchParams();
+  _ord.append('form-name','order');
+  _ord.append('order-number', orderNum);
+  _ord.append('customer-name', fname + ' ' + lname);
+  _ord.append('email', email);
+  _ord.append('address', `${address}, ${city}, ${state} ${zip}`);
+  _ord.append('items', itemLines.replace(/\n/g,' | '));
+  _ord.append('total', '$' + total.toFixed(2));
+  _ord.append('promo', activePromo ? `${activePromo.code} (${activePromo.value}% off)` : 'none');
+  _ord.append('timestamp', new Date().toLocaleString());
+  fetch('/', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: _ord.toString()}).catch(()=>{});
 
   toast('Order placed! You will receive a confirmation shortly.','success');
   cart = []; activePromo = null;
@@ -1855,31 +1827,7 @@ Time: ${new Date().toLocaleString()}
   setTimeout(() => navigate('shop'), 2000);
 }
 
-function sendOrderNotification(orderNum, message, customerName, customerEmail, total) {
-  // EmailJS template params — set these up in your EmailJS dashboard
-  const templateParams = {
-    to_email: 'cryonix.research@gmail.com',
-    reply_to: customerEmail,
-    subject: `New Order ${orderNum} — $${total.toFixed(2)} — Cryonix Research`,
-    order_number: orderNum,
-    customer_name: customerName,
-    customer_email: customerEmail,
-    message: message,
-    // SMS via EmailJS SMS template
-    to_number: '+17049414751',
-    sms_body: `CRYONIX ORDER ${orderNum} — $${total.toFixed(2)} from ${customerName}. Check email for details.`,
-  };
-
-  // Send email notification to you
-  emailjs.send('YOUR_SERVICE_ID', 'YOUR_ORDER_TEMPLATE_ID', templateParams)
-    .then(() => console.log('Order email sent'))
-    .catch(err => console.error('Email error:', err));
-
-  // Send SMS notification (requires EmailJS SMS service or Twilio template)
-  emailjs.send('YOUR_SERVICE_ID', 'YOUR_SMS_TEMPLATE_ID', templateParams)
-    .then(() => console.log('Order SMS sent'))
-    .catch(err => console.error('SMS error:', err));
-}
+// Order notifications are recorded via Netlify Forms (see placeOrder).
 
 
 // ── MOBILE NAV + SIDEBAR ──
@@ -1938,7 +1886,7 @@ window.addEventListener('scroll', () => {
 // ═══════════════════════════════
 //  INIT
 // ═══════════════════════════════
-loadProducts();   // fetches from Google Sheets, falls back to hardcoded
+renderProducts();
 applyMobileLayout();
 updateMobileNav('shop');
 // Restore saved promo UI on load
