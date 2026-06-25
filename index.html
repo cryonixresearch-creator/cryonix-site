@@ -1293,20 +1293,49 @@ function lookupPromo(code) {
 
 let activePromo = null;
 
-function applyPromo() {
+async function applyPromo() {
   const raw = document.getElementById('promoInput').value.trim().toUpperCase();
   const input = document.getElementById('promoInput');
-  const msg = document.getElementById('promoMsg');
   if (!raw) { showPromoMsg('Please enter a code','invalid'); return; }
-  const promo = lookupPromo(raw);
+
+  // Validate against the sheet-driven Netlify function. The in-page _PC list
+  // is used only as a fallback if that request fails (offline / function down).
+  let promo = await validatePromoServer(raw);
+  if (promo === undefined) promo = lookupPromo(raw); // network error -> fallback
   if (!promo) {
     input.className = 'promo-input invalid';
     showPromoMsg('Invalid code. Please try again.','invalid');
     return;
   }
-  activePromo = {code: raw, ...promo};
+  applyValidPromo(raw, promo);
+}
+
+// Returns a promo object if valid, null if the server says invalid,
+// or undefined on a network error (so the caller can fall back).
+async function validatePromoServer(code) {
+  try {
+    const res = await fetch('/.netlify/functions/validate-promo', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ code: code })
+    });
+    if (!res.ok) return undefined;
+    const data = await res.json();
+    if (data && data.ok) {
+      return { type: data.type || 'percent', value: data.value, label: data.label || (data.value + '% off') };
+    }
+    return null;
+  } catch (e) {
+    return undefined;
+  }
+}
+
+function applyValidPromo(raw, promo) {
+  const input = document.getElementById('promoInput');
+  const msg = document.getElementById('promoMsg');
+  activePromo = {code: raw, type: promo.type || 'percent', value: promo.value, label: promo.label};
   input.className = 'promo-input valid';
-  showPromoMsg(`${promo.label} applied!`, 'valid');
+  showPromoMsg(promo.label + ' applied!', 'valid');
   // Show tag, hide input
   setTimeout(() => {
     const _piw = document.getElementById('promoInputWrap'); if(_piw) _piw.style.display = 'none';
