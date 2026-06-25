@@ -7,6 +7,7 @@ const CODES = {
   "NICK15":   { value: 15, label: "15% off" },
   "JONES15":  { value: 15, label: "15% off" },
   "FISHY20":  { value: 20, label: "20% off" },
+  "EDDIE15":  { value: 15, label: "15% off" },
 };
 
 exports.handler = async (event) => {
