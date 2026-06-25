@@ -23,6 +23,7 @@
   button{background:var(--blue);color:#fff;border:none;border-radius:8px;padding:11px 18px;font-size:14px;font-weight:600;cursor:pointer;margin-top:12px}
   button.ghost{background:#fff;color:var(--blue);border:1.5px solid var(--border)}
   button.small{padding:8px 12px;font-size:12.5px;margin:6px 6px 0 0}
+  button.ai{background:linear-gradient(135deg,#0d5fcf,#7b2ff7);border:none;color:#fff}
   .out{font-size:13px;margin-top:12px;padding:10px 12px;border-radius:8px;display:none;white-space:pre-wrap;word-break:break-word}
   .out.ok{display:block;background:#e0f5ed;color:#0d7a4e}
   .out.err{display:block;background:#fdeaea;color:#b62d2d}
@@ -34,7 +35,7 @@
 <body>
 <div class="wrap">
   <h1>Cryonix Admin</h1>
-  <p class="sub">Preview emails, reply to customers, send shipped notices and newsletters. Nothing here works without your admin token.</p>
+  <p class="sub">Preview emails, reply to customers (with AI), send shipped notices and newsletters. Nothing here works without your admin token.</p>
 
   <div class="tokbar">
     <label>Admin token</label>
@@ -61,7 +62,7 @@
   <!-- REPLY TO CONTACT -->
   <div class="card">
     <h2>✉️ Reply to a contact question</h2>
-    <p class="note">Copy the customer's email, name and message from the notification in your Gmail. Pick a topic to drop in a formatted draft, edit it, then send a branded reply.</p>
+    <p class="note">Paste the customer's email, name and message from the notification in your Gmail. Click "Draft with AI" for a tailored reply, or pick a topic for a quick template. Edit, then send a branded reply.</p>
     <div class="row">
       <div><label>Customer email</label><input id="r_email" placeholder="customer@lab.com"/></div>
       <div><label>Customer name</label><input id="r_name" placeholder="Jane Smith"/></div>
@@ -76,10 +77,11 @@
       <option>Return / Replacement</option>
       <option>Technical / Research Question</option>
     </select>
-    <label>Their question (optional, for your reference)</label>
-    <textarea id="r_question" style="min-height:70px" placeholder="Paste the customer's message here…"></textarea>
+    <label>Their question (paste the customer's message)</label>
+    <textarea id="r_question" style="min-height:80px" placeholder="Paste the customer's message here…"></textarea>
+    <button class="ai small" onclick="aiDraft()">✨ Draft with AI</button>
     <label>Your reply (edit before sending)</label>
-    <textarea id="r_reply" placeholder="Pick a topic above, or write your reply…"></textarea>
+    <textarea id="r_reply" placeholder="Click 'Draft with AI', pick a topic, or write your reply…"></textarea>
     <button onclick="sendReply()">Send reply to customer</button>
     <div id="r_out" class="out"></div>
   </div>
@@ -150,6 +152,17 @@
     return {status:res.status, data};
   }
   function show(el, ok, msg){ el.className = 'out ' + (ok?'ok':'err'); el.textContent = msg; }
+
+  async function aiDraft(){
+    const out = $('r_out');
+    if(!$('r_question').value.trim()){ return show(out,false,'Paste the customer\'s message first so the AI has something to work from.'); }
+    out.className='out'; out.textContent='Drafting with AI…';
+    const {status,data} = await post('draft-reply',{
+      question:$('r_question').value, topic:$('r_topic').value||'', customerName:$('r_name').value.trim()
+    });
+    if(data.ok){ $('r_reply').value = data.draft; show(out,true,'Draft ready — review/edit above, then Send.'); }
+    else { show(out,false,'Error ('+status+'): '+(data.error||'failed')); }
+  }
 
   async function sendTest(type){
     const out = $('t_out');
