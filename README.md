@@ -3,7 +3,7 @@
 ## What's here
 - index.html ............ the whole storefront (one file)
 - netlify.toml .......... tells Netlify where the function lives
-- netlify/functions/validate-promo.js .. checks promo codes on the server (codes are NOT in the page)
+- netlify/functions/validate-promo.js .. validates promo codes server-side, reading them from the "Promos" tab of the Cryonix Products sheet (codes are NOT in the page)
 
 ## Deploy (GitHub method - makes promo codes work)
 1. Create a free account at github.com.
@@ -21,7 +21,13 @@ Site configuration > Notifications > Form notifications > Add notification > Ema
 Enter: cryonix.research@gmail.com   (or whichever address you want)
 
 ## Edit promo codes
-Open netlify/functions/validate-promo.js, edit the CODES list, commit. Never appears in the page.
+Codes live in the "Promos" tab of the Cryonix Products sheet (columns: code, percent, active).
+- Add a code: add a row, e.g.  SUMMER25 | 25 | yes
+- Turn one off: set its `active` cell to  no  (no need to delete the row)
+- Optional: add a `label` column for custom wording, e.g. "Friends & Family 15%"
+Changes go live within about a minute. No code edit and no commit needed.
+The Promos tab is published to the web as CSV and the function reads that link;
+if the sheet is ever unreachable, a built-in copy of the codes keeps things working.
 
 ## Edit stock
 In index.html find a product line and set stock to:
