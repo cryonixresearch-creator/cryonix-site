@@ -12,7 +12,7 @@
 // list is used, so existing codes keep working no matter what.
 
 const PROMO_CSV_URL = process.env.PROMO_CSV_URL || "";
-const PROMO_CSV_URL_FALLBACK = ""; // optional: hardcode the published CSV URL here
+const PROMO_CSV_URL_FALLBACK = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTOVDkP0WwK7fOiaKw7i5pnFYJb9P5RBDkyZ9KMfXHOCQ7eGlD81BlXtvm3r0ArpVhnp8TjKlmH5_6O/pub?gid=782770332&single=true&output=csv"; // Published "Promos" tab CSV
 
 const STATIC_CODES = {
   "DEXFIT20": { value: 20, label: "20% off" },
