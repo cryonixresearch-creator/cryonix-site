@@ -234,6 +234,10 @@ nav a:hover,nav a.active{background:var(--sky);color:var(--blue)}
 .product-img{background:linear-gradient(135deg,var(--sky) 0%,var(--sky2) 100%);height:165px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
 .product-img svg{opacity:.5;transition:transform .3s}
 .product-card:hover .product-img svg{transform:scale(1.08)}
+.product-img img.product-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;z-index:0}
+.modal-img-wrap{overflow:hidden}
+.modal-img-wrap img.modal-photo{width:100%;height:100%;object-fit:cover;display:block}
+a.btn-coa-dl{text-decoration:none}
 .badge{position:absolute;top:10px;left:10px;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:3px 9px;border-radius:100px}
 .badge-featured{background:#e8f0fe;color:#1a56db}
 .badge-sale{background:#fde8e8;color:var(--red)}
@@ -611,7 +615,7 @@ footer{background:var(--navy2);color:#6895c4;padding:48px 24px 28px}
       <button class="modal-close" onclick="closeModal()">&#x2715;</button>
     </div>
     <div class="modal-content">
-      <div class="modal-img-wrap">
+      <div class="modal-img-wrap" id="mImgWrap">
         <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#378ADD" stroke-width="1.1"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3M3 16v3a2 2 0 002 2h3m8 0h3a2 2 0 002-2v-3"/><circle cx="12" cy="12" r="3"/></svg>
       </div>
       <div class="modal-meta">
@@ -1520,6 +1524,10 @@ function openModal(idx) {
   document.getElementById('mPrice').textContent = '$' + p.price.toFixed(2);
   document.getElementById('mOrig').textContent = p.orig ? '$' + p.orig.toFixed(2) : '';
   document.getElementById('mDesc').textContent = p.desc;
+  const _iw = document.getElementById('mImgWrap');
+  if (_iw) _iw.innerHTML = p.image ? `<img class="modal-photo" src="${cxAttr(p.image)}" alt="${cxAttr(p.name)}" loading="lazy" onerror="this.parentNode.innerHTML=MODAL_IMG_SVG">` : MODAL_IMG_SVG;
+  const _note = document.querySelector('#productModal .modal-note');
+  if (_note) _note.innerHTML = 'For research use only. Not for human consumption. ' + (p.coa ? `<a href="${cxAttr(p.coa)}" target="_blank" rel="noopener noreferrer" style="color:var(--blue)">View COA &#8594;</a>` : 'COA available upon request.');
   const inCart = cart.find(c => c.idx === idx);
   const inStock = p.stock !== false;
   const btn = document.getElementById('mCartBtn');
@@ -1640,7 +1648,7 @@ function renderProducts() {
     grid.innerHTML += `
       <div class="product-card${!inStock?' oos':''}" onclick="openModal(${idx})">
         <div class="product-img">
-          ${SVGS[idx%SVGS.length]}${badge}
+          ${p.image ? `<img class="product-photo" src="${cxAttr(p.image)}" alt="${cxAttr(p.name)}" loading="lazy" onerror="this.remove()">` : SVGS[idx%SVGS.length]}${badge}
           <span class="mg-pill">${p.mg}</span>
           ${oosOverlay}
         </div>
@@ -1711,10 +1719,13 @@ function renderCOA() {
       <div class="coa-name">${p.name} (${p.mg})</div>
       <div class="coa-batch">Batch: ${batches[i%batches.length]}</div>
       <span class="coa-purity">&#8805;99.1% Purity</span>
-      <button class="btn-coa-dl" onclick="toast('COA PDF for ${p.name} will be available at launch','info')">
+      ${p.coa
+        ? `<a class="btn-coa-dl" href="${cxAttr(p.coa)}" target="_blank" rel="noopener noreferrer">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Download COA PDF
-      </button>
+        View COA</a>`
+        : `<button class="btn-coa-dl" onclick="toast('COA for ${p.name} coming soon','info')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        COA coming soon</button>`}
     </div>`).join('');
 }
 
@@ -2011,6 +2022,8 @@ updateCartBadge();
 var PRODUCTS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTOVDkP0WwK7fOiaKw7i5pnFYJb9P5RBDkyZ9KMfXHOCQ7eGlD81BlXtvm3r0ArpVhnp8TjKlmH5_6O/pub?gid=0&single=true&output=csv";
 var SETTINGS_CSV_URL = "PASTE_YOUR_PUBLISHED_SETTINGS_CSV_URL_HERE";
 
+function cxAttr(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+const MODAL_IMG_SVG='<svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#378ADD" stroke-width="1.1"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3M3 16v3a2 2 0 002 2h3m8 0h3a2 2 0 002-2v-3"/><circle cx="12" cy="12" r="3"/></svg>';
 function cxToNum(s){var n=parseFloat(String(s).replace(/[^0-9.]/g,""));return isNaN(n)?0:n;}
 function cxParseCsv(text){
   var rows=[],row=[],field="",q=false;text=String(text).replace(/\r\n/g,"\n").replace(/\r/g,"\n");
@@ -2034,7 +2047,7 @@ function cxRerender(){
     var rows=cxParseCsv(txt);if(!rows||rows.length<2)return;
     var h=rows[0].map(function(x){return x.trim().toLowerCase();});
     function ci(n){return h.indexOf(n);}
-    var col={name:ci("name"),mg:ci("mg"),sub:ci("sub"),price:ci("price"),orig:ci("orig"),desc:ci("desc"),badge:ci("badge"),cat:ci("cat"),stock:ci("stock"),featured:ci("featured")};
+    var col={name:ci("name"),mg:ci("mg"),sub:ci("sub"),price:ci("price"),orig:ci("orig"),desc:ci("desc"),badge:ci("badge"),cat:ci("cat"),stock:ci("stock"),featured:ci("featured"),image:(ci("image")>-1?ci("image"):(ci("img")>-1?ci("img"):ci("photo"))),coa:(ci("coa")>-1?ci("coa"):(ci("coa_url")>-1?ci("coa_url"):ci("coa link")))};
     if(col.name===-1||col.price===-1)return;
     var list=[];
     for(var r=1;r<rows.length;r++){(function(row){
@@ -2043,7 +2056,7 @@ function cxRerender(){
       var badge=g(col.badge).toLowerCase();if(badge==="none")badge="";
       var fc=g(col.featured).toLowerCase();var featured=badge==="featured"||fc==="yes"||fc==="true"||fc==="1";
       var stock=g(col.stock).toLowerCase();if(["in","low","out"].indexOf(stock)===-1)stock="in";
-      list.push({name:name,mg:g(col.mg),sub:g(col.sub),price:cxToNum(g(col.price)),orig:g(col.orig)?cxToNum(g(col.orig)):null,badge:badge,featured:featured,cat:g(col.cat),stock:stock,desc:g(col.desc)});
+      list.push({name:name,mg:g(col.mg),sub:g(col.sub),price:cxToNum(g(col.price)),orig:g(col.orig)?cxToNum(g(col.orig)):null,badge:badge,featured:featured,cat:g(col.cat),stock:stock,desc:g(col.desc),image:g(col.image),coa:g(col.coa)});
     })(rows[r]);}
     if(!list.length)return;
     PRODUCTS.length=0;list.forEach(function(p){PRODUCTS.push(p);});
