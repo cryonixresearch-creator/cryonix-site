@@ -9,35 +9,79 @@
   :root{--navy:#031c3d;--blue:#0d5fcf;--border:#c8ddf5;--ink:#0b2545;--muted:#5b7290;--ice:#f3f8ff}
   *{box-sizing:border-box;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
   body{margin:0;background:#eef5ff;color:var(--ink);padding:24px}
-  .wrap{max-width:680px;margin:0 auto}
+  .wrap{max-width:720px;margin:0 auto}
   h1{font-size:22px;margin:0 0 4px}
   .sub{color:var(--muted);font-size:13px;margin:0 0 22px}
   .card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:22px;margin-bottom:18px}
-  .card h2{font-size:16px;margin:0 0 14px}
+  .card h2{font-size:16px;margin:0 0 6px}
+  .card p.note{font-size:12px;color:var(--muted);margin:0 0 14px;line-height:1.6}
   label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;letter-spacing:.04em}
-  input,textarea{width:100%;border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:14px;color:var(--ink);outline:none}
-  input:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(13,95,207,.12)}
+  input,textarea,select{width:100%;border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:14px;color:var(--ink);outline:none;background:#fff}
+  input:focus,textarea:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(13,95,207,.12)}
   textarea{min-height:120px;resize:vertical}
-  .row{display:flex;gap:12px}.row>div{flex:1}
-  button{background:var(--blue);color:#fff;border:none;border-radius:8px;padding:11px 22px;font-size:14px;font-weight:600;cursor:pointer;margin-top:14px}
+  .row{display:flex;gap:12px;flex-wrap:wrap}.row>div{flex:1;min-width:180px}
+  button{background:var(--blue);color:#fff;border:none;border-radius:8px;padding:11px 18px;font-size:14px;font-weight:600;cursor:pointer;margin-top:12px}
   button.ghost{background:#fff;color:var(--blue);border:1.5px solid var(--border)}
+  button.small{padding:8px 12px;font-size:12.5px;margin:6px 6px 0 0}
   .out{font-size:13px;margin-top:12px;padding:10px 12px;border-radius:8px;display:none;white-space:pre-wrap;word-break:break-word}
   .out.ok{display:block;background:#e0f5ed;color:#0d7a4e}
   .out.err{display:block;background:#fdeaea;color:#b62d2d}
   .tokbar{background:var(--navy);color:#fff;border-radius:12px;padding:16px 18px;margin-bottom:18px}
   .tokbar label{color:#9cc2f5}.tokbar input{background:#0a2a52;border-color:#1d4677;color:#fff}
-  .hint{font-size:12px;color:var(--muted);line-height:1.6;margin-top:8px}
+  .btns{display:flex;flex-wrap:wrap;gap:6px}
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>Cryonix Admin</h1>
-  <p class="sub">Trigger order-shipped emails and send newsletters. Nothing here works without your admin token.</p>
+  <p class="sub">Preview emails, reply to customers, send shipped notices and newsletters. Nothing here works without your admin token.</p>
 
   <div class="tokbar">
     <label>Admin token</label>
     <input id="token" type="password" placeholder="Paste your ADMIN_TOKEN" autocomplete="off"/>
-    <div class="hint" style="color:#9cc2f5">Stored only in this browser tab. Must match the ADMIN_TOKEN you set in Netlify.</div>
+    <div style="font-size:12px;color:#9cc2f5;margin-top:8px;line-height:1.6">Stored only in this browser tab. Must match the ADMIN_TOKEN in Netlify.</div>
+  </div>
+
+  <!-- TEST EMAILS -->
+  <div class="card">
+    <h2>🧪 Preview / test emails</h2>
+    <p class="note">Sends a sample of each template to your own inbox so you can see exactly what customers receive.</p>
+    <div class="btns">
+      <button class="small ghost" onclick="sendTest('received')">Order received</button>
+      <button class="small ghost" onclick="sendTest('shipped')">Order shipped</button>
+      <button class="small ghost" onclick="sendTest('contact_confirm')">Contact confirmation</button>
+      <button class="small ghost" onclick="sendTest('contact_notify')">Contact notification</button>
+      <button class="small ghost" onclick="sendTest('reply')">Contact reply</button>
+      <button class="small ghost" onclick="sendTest('welcome')">Welcome</button>
+      <button class="small ghost" onclick="sendTest('newsletter')">Newsletter</button>
+    </div>
+    <div id="t_out" class="out"></div>
+  </div>
+
+  <!-- REPLY TO CONTACT -->
+  <div class="card">
+    <h2>✉️ Reply to a contact question</h2>
+    <p class="note">Copy the customer's email, name and message from the notification in your Gmail. Pick a topic to drop in a formatted draft, edit it, then send a branded reply.</p>
+    <div class="row">
+      <div><label>Customer email</label><input id="r_email" placeholder="customer@lab.com"/></div>
+      <div><label>Customer name</label><input id="r_name" placeholder="Jane Smith"/></div>
+    </div>
+    <label>Topic (loads a starting template)</label>
+    <select id="r_topic" onchange="loadTemplate()">
+      <option value="">— choose a topic —</option>
+      <option>General Inquiry</option>
+      <option>Order Issue</option>
+      <option>COA Request</option>
+      <option>Bulk / Wholesale Pricing</option>
+      <option>Return / Replacement</option>
+      <option>Technical / Research Question</option>
+    </select>
+    <label>Their question (optional, for your reference)</label>
+    <textarea id="r_question" style="min-height:70px" placeholder="Paste the customer's message here…"></textarea>
+    <label>Your reply (edit before sending)</label>
+    <textarea id="r_reply" placeholder="Pick a topic above, or write your reply…"></textarea>
+    <button onclick="sendReply()">Send reply to customer</button>
+    <div id="r_out" class="out"></div>
   </div>
 
   <!-- ORDER SHIPPED -->
@@ -52,7 +96,7 @@
       <div><label>Carrier (optional)</label><input id="s_carrier" placeholder="USPS"/></div>
     </div>
     <div class="row">
-      <div><label>Tracking # (optional)</label><input id="s_tracking" placeholder="9400 1000 0000 0000"/></div>
+      <div><label>Tracking # (optional)</label><input id="s_tracking" placeholder="9400 1000 0000"/></div>
       <div><label>Est. delivery (optional)</label><input id="s_eta" placeholder="Jun 30"/></div>
     </div>
     <button onclick="sendShipped()">Send shipped email</button>
@@ -66,9 +110,8 @@
     <input id="n_subject" placeholder="This week in research peptides + 10% off"/>
     <label>Headline (top of email)</label>
     <input id="n_headline" placeholder="New arrivals & this week's research roundup"/>
-    <label>Body HTML (paste the AI-generated content)</label>
+    <label>Body HTML</label>
     <textarea id="n_body" placeholder="&lt;p&gt;...&lt;/p&gt;"></textarea>
-    <div class="hint">The 10%-off code is added automatically and matches the site for this week. Ask Claude to "generate this week's newsletter" to fill these fields.</div>
     <div class="row">
       <div><button class="ghost" onclick="sendNewsletter(true)">Send TEST to me</button></div>
       <div><button onclick="sendNewsletter(false)">Send to full list</button></div>
@@ -81,9 +124,21 @@
 
 <script>
   const $ = id => document.getElementById(id);
-  // remember token within this tab only
   $('token').value = sessionStorage.getItem('cx_admin_tok') || '';
   $('token').addEventListener('input', e => sessionStorage.setItem('cx_admin_tok', e.target.value));
+
+  const TEMPLATES = {
+    'General Inquiry': "Thank you for reaching out to Cryonix Research.\n\n[Answer the customer's question here.]\n\nIf there's anything else we can help with, just let us know.",
+    'Order Issue': "Thanks for contacting us about your order.\n\nI've looked into this and [explain the status or resolution here]. We'll make sure it's sorted out quickly.\n\nIf you can share your order number (format CRY-xxxxx), I can give you an exact update.",
+    'COA Request': "Thanks for your interest in our quality documentation.\n\nThe Certificate of Analysis for the requested product/batch is available here: [paste link]. All Cryonix compounds are third-party tested to at least 99% purity.\n\nLet me know if you need COAs for any other items.",
+    'Bulk / Wholesale Pricing': "Thank you for your interest in bulk and wholesale pricing.\n\nWe offer tiered discounts for orders over $1,000 and for recurring research accounts (up to 30% for qualified institutional researchers).\n\nCould you share the products and quantities you're considering? I'll put together a quote.",
+    'Return / Replacement': "Thank you for letting us know.\n\nDue to the nature of research chemicals we don't accept general returns, but if your order arrived damaged or incorrect we'll arrange a replacement or refund.\n\nPlease reply with your order number and a photo of the issue within 48 hours of delivery and we'll take care of it.",
+    'Technical / Research Question': "Thanks for your research question.\n\n[Provide the technical, reconstitution or storage information here.] All guidance is provided strictly for in-vitro research and laboratory use only.\n\nHappy to point you toward relevant literature if that would help."
+  };
+  function loadTemplate(){
+    const t = $('r_topic').value;
+    if(t && TEMPLATES[t]){ $('r_reply').value = TEMPLATES[t]; }
+  }
 
   async function post(path, body){
     const res = await fetch('/.netlify/functions/' + path, {
@@ -96,26 +151,42 @@
   }
   function show(el, ok, msg){ el.className = 'out ' + (ok?'ok':'err'); el.textContent = msg; }
 
+  async function sendTest(type){
+    const out = $('t_out');
+    out.className='out'; out.textContent='Sending sample…';
+    const {status,data} = await post('send-test',{type});
+    show(out, data.ok, data.ok ? ('Sample "'+type+'" sent to '+data.sent+'. Check your inbox.') : ('Error ('+status+'): '+(data.error||'failed')));
+  }
+
+  async function sendReply(){
+    const out = $('r_out');
+    if(!$('r_email').value || !$('r_reply').value){ return show(out,false,'Customer email and a reply are required.'); }
+    out.className='out'; out.textContent='Sending…';
+    const {status,data} = await post('send-reply',{
+      to:$('r_email').value.trim(), name:$('r_name').value.trim(),
+      subject:$('r_topic').value || '', replyText:$('r_reply').value
+    });
+    show(out, data.ok, data.ok ? ('Reply sent to '+data.sent) : ('Error ('+status+'): '+(data.error||'failed')));
+  }
+
   async function sendShipped(){
     const out = $('s_out');
     if(!$('s_order').value || !$('s_email').value){ return show(out,false,'Order number and email are required.'); }
-    out.className='out'; out.textContent='';
+    out.className='out'; out.textContent='Sending…';
     const {status,data} = await post('send-order-email',{
       orderNumber:$('s_order').value.trim(), email:$('s_email').value.trim(),
       customerName:$('s_name').value.trim(), carrier:$('s_carrier').value.trim(),
       tracking:$('s_tracking').value.trim(), eta:$('s_eta').value.trim()
     });
-    show(out, data.ok, data.ok ? ('Sent to ' + data.sent + ' for ' + data.orderNumber) : ('Error ('+status+'): ' + (data.error||'failed')));
+    show(out, data.ok, data.ok ? ('Sent to '+data.sent+' for '+data.orderNumber) : ('Error ('+status+'): '+(data.error||'failed')));
   }
 
   async function sendNewsletter(test){
     const out = $('n_out');
-    if(!$('n_subject').value || !$('n_headline').value || !$('n_body').value){
-      return show(out,false,'Subject, headline and body are required.');
-    }
+    if(!$('n_subject').value || !$('n_headline').value || !$('n_body').value){ return show(out,false,'Subject, headline and body are required.'); }
     if(test && !$('n_test').value){ return show(out,false,'Enter a test email address.'); }
     if(!test && !confirm('Send to your ENTIRE newsletter list now?')) return;
-    out.className='out'; out.textContent='Sending...';
+    out.className='out'; out.textContent='Sending…';
     const {status,data} = await post('send-newsletter',{
       subject:$('n_subject').value.trim(), headline:$('n_headline').value.trim(),
       bodyHtml:$('n_body').value, includePromo:true,
@@ -123,7 +194,7 @@
     });
     show(out, data.ok, data.ok
       ? (test ? ('Test sent to '+data.sentTo+'. Code: '+data.promoCode) : ('Campaign sent! Code: '+data.promoCode))
-      : ('Error ('+status+'): ' + (data.error||'failed')));
+      : ('Error ('+status+'): '+(data.error||'failed')));
   }
 </script>
 </body>
