@@ -35,7 +35,7 @@
 <body>
 <div class="wrap">
   <h1>Cryonix Admin</h1>
-  <p class="sub">Preview emails, reply to customers (with AI), send shipped notices and newsletters. Nothing here works without your admin token.</p>
+  <p class="sub">Preview emails, reply to customers (draft in Claude), send shipped notices and newsletters. Nothing here works without your admin token.</p>
 
   <div class="tokbar">
     <label>Admin token</label>
@@ -62,7 +62,7 @@
   <!-- REPLY TO CONTACT -->
   <div class="card">
     <h2>✉️ Reply to a contact question</h2>
-    <p class="note">Paste the customer's email, name and message from the notification in your Gmail. Click "Draft with AI" for a tailored reply, or pick a topic for a quick template. Edit, then send a branded reply.</p>
+    <p class="note">Paste the customer's email, name and message from your Gmail notification. Click "Draft in Claude" to open a Claude chat pre-filled with the request (uses your Claude plan, no extra cost) — copy its reply back here. Or pick a topic for a quick template. Edit, then send a branded reply.</p>
     <div class="row">
       <div><label>Customer email</label><input id="r_email" placeholder="customer@lab.com"/></div>
       <div><label>Customer name</label><input id="r_name" placeholder="Jane Smith"/></div>
@@ -79,9 +79,9 @@
     </select>
     <label>Their question (paste the customer's message)</label>
     <textarea id="r_question" style="min-height:80px" placeholder="Paste the customer's message here…"></textarea>
-    <button class="ai small" onclick="aiDraft()">✨ Draft with AI</button>
+    <button class="ai small" onclick="draftInClaude()">✨ Draft in Claude</button>
     <label>Your reply (edit before sending)</label>
-    <textarea id="r_reply" placeholder="Click 'Draft with AI', pick a topic, or write your reply…"></textarea>
+    <textarea id="r_reply" placeholder="Click 'Draft in Claude' and paste its reply here, pick a topic, or write your own…"></textarea>
     <button onclick="sendReply()">Send reply to customer</button>
     <div id="r_out" class="out"></div>
   </div>
@@ -142,6 +142,24 @@
     if(t && TEMPLATES[t]){ $('r_reply').value = TEMPLATES[t]; }
   }
 
+  // Opens a new Claude chat pre-filled with a drafting prompt (uses your Claude plan).
+  function draftInClaude(){
+    const out = $('r_out');
+    const q = $('r_question').value.trim();
+    if(!q){ return show(out,false,'Paste the customer\'s message first so Claude has something to work from.'); }
+    const name = $('r_name').value.trim();
+    const topic = $('r_topic').value || '';
+    const prompt =
+      "You're drafting a customer-support email reply for Cryonix Research, a supplier of research peptides sold strictly for in-vitro research and laboratory use only (RUO).\n\n" +
+      "Write ONLY the body of a warm, professional, concise reply. No greeting and no sign-off (those are added automatically). Use short paragraphs. Give no dosing, medical, or human/animal-use advice. If you don't have a specific detail (order status, COA link, price), use a [bracketed placeholder] or ask for the order number rather than inventing it.\n\n" +
+      (name ? "Customer name: " + name + "\n" : "") +
+      (topic ? "Topic: " + topic + "\n" : "") +
+      "Customer's message:\n\"" + q + "\"\n\nWrite the reply body now.";
+    try { navigator.clipboard.writeText(prompt); } catch(e){}
+    window.open("https://claude.ai/new?q=" + encodeURIComponent(prompt), "_blank");
+    show(out, true, "Opened Claude in a new tab with the request (also copied to your clipboard as a backup — paste it if the chat is empty). Copy Claude's reply into the box above, edit, then Send.");
+  }
+
   async function post(path, body){
     const res = await fetch('/.netlify/functions/' + path, {
       method:'POST',
@@ -152,17 +170,6 @@
     return {status:res.status, data};
   }
   function show(el, ok, msg){ el.className = 'out ' + (ok?'ok':'err'); el.textContent = msg; }
-
-  async function aiDraft(){
-    const out = $('r_out');
-    if(!$('r_question').value.trim()){ return show(out,false,'Paste the customer\'s message first so the AI has something to work from.'); }
-    out.className='out'; out.textContent='Drafting with AI…';
-    const {status,data} = await post('draft-reply',{
-      question:$('r_question').value, topic:$('r_topic').value||'', customerName:$('r_name').value.trim()
-    });
-    if(data.ok){ $('r_reply').value = data.draft; show(out,true,'Draft ready — review/edit above, then Send.'); }
-    else { show(out,false,'Error ('+status+'): '+(data.error||'failed')); }
-  }
 
   async function sendTest(type){
     const out = $('t_out');
