@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Cryonix — Vial Label Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;1,400;1,500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root{
+    --navy:#031c3d; --navy2:#052a5a; --blue:#0d5fcf; --sky:#4fa3f7;
+    --ink:#071b38; --mid:#2e4e7a; --muted:#6888a8; --border:#c8ddf5;
+    --ice:#eef5ff; --white:#fff; --head:'Playfair Display',Georgia,serif; --body:'Inter',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--body);color:var(--ink);background:var(--ice);}
+  .app{display:grid;grid-template-columns:340px 1fr;min-height:100vh;}
+  /* ---- controls ---- */
+  .panel{background:var(--navy);color:#dce9fb;padding:22px 20px 40px;overflow-y:auto;max-height:100vh;}
+  .panel h1{font-family:var(--head);font-weight:500;font-size:21px;color:#fff;margin:0 0 2px;}
+  .panel .sub{font-size:12px;color:#7aaed5;margin:0 0 18px;line-height:1.5;}
+  .grp{margin-bottom:14px;}
+  .grp label{display:block;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#9cc2f5;margin-bottom:5px;}
+  .grp input,.grp select{width:100%;border:1px solid #1d4677;background:#0a2a52;color:#fff;border-radius:8px;padding:9px 11px;font-size:13.5px;font-family:var(--body);outline:none;}
+  .grp input:focus,.grp select:focus{border-color:var(--sky);box-shadow:0 0 0 3px rgba(79,163,247,.18);}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .hint{font-size:11px;color:#6f9fcf;margin-top:4px;line-height:1.45;}
+  .btn{width:100%;background:var(--blue);color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;margin-top:8px;font-family:var(--body);}
+  .btn:hover{background:#1f6fe0;}
+  .btn.ghost{background:transparent;border:1.5px solid #1d4677;color:#bcd6f5;margin-top:8px;}
+  .chk{display:flex;align-items:center;gap:8px;font-size:12.5px;color:#bcd6f5;margin-top:6px;cursor:pointer;}
+  .chk input{width:auto;}
+  /* ---- stage ---- */
+  .stage{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:46px 24px;gap:14px;}
+  .stage .cap{font-size:12px;color:var(--muted);letter-spacing:.04em;}
+  .stage .cap b{color:var(--mid);}
+  /* ===== THE LABEL ===== */
+  .label{
+    --W:68mm; --H:30mm; --scale:1; --u:calc(var(--H)*var(--scale));
+    width:var(--W); height:var(--H);
+    background:#fff; color:var(--navy);
+    border:0.25mm solid #cfe0f3; border-radius:1.6mm;
+    box-sizing:border-box; padding:calc(var(--H)*0.06) calc(var(--H)*0.08);
+    display:flex; flex-direction:row; align-items:stretch; gap:calc(var(--H)*0.08);
+    position:relative; overflow:hidden; font-family:var(--body);
+  }
+  .label::before{content:"";position:absolute;left:0;top:0;bottom:0;width:calc(var(--H)*0.045);background:linear-gradient(var(--navy),var(--blue));}
+  .l-main{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;justify-content:space-between;padding-left:calc(var(--H)*0.05);}
+  .l-side{flex:0 0 auto;display:flex;align-items:center;justify-content:center;}
+  .l-top{display:flex;align-items:center;justify-content:space-between;gap:1mm;}
+  .l-brand{display:flex;align-items:center;gap:calc(var(--H)*0.07);}
+  .l-mark{width:calc(var(--u)*0.2);height:calc(var(--u)*0.2);background:var(--navy);border-radius:calc(var(--u)*0.04);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .l-mark svg{width:72%;height:72%;}
+  .l-word{font-family:var(--head);font-weight:600;font-size:calc(var(--u)*0.165);color:var(--navy);line-height:1;letter-spacing:.01em;}
+  .l-word span{color:var(--blue);}
+  .l-ruo-tag{font-size:calc(var(--u)*0.082);font-weight:700;letter-spacing:.06em;color:#fff;background:var(--navy);padding:calc(var(--u)*0.03) calc(var(--u)*0.07);border-radius:100px;text-transform:uppercase;white-space:nowrap;}
+  .l-mid{display:flex;align-items:flex-end;gap:calc(var(--u)*0.1);flex-wrap:wrap;line-height:1;}
+  .l-name{font-family:var(--head);font-weight:600;font-size:calc(var(--u)*0.27);color:var(--ink);line-height:.92;overflow-wrap:anywhere;}
+  .l-mg{font-size:calc(var(--u)*0.135);font-weight:700;color:#fff;background:var(--blue);border-radius:100px;padding:calc(var(--u)*0.035) calc(var(--u)*0.1);letter-spacing:.02em;white-space:nowrap;}
+  .l-desc{font-size:calc(var(--u)*0.092);color:var(--mid);font-weight:500;letter-spacing:.01em;margin-top:calc(var(--u)*-0.01);}
+  .l-rule{height:0.18mm;background:linear-gradient(90deg,var(--sky),transparent);margin:calc(var(--u)*0.02) 0;}
+  .l-warn{font-size:calc(var(--u)*0.085);font-weight:800;letter-spacing:.02em;color:var(--navy);text-transform:uppercase;line-height:1.12;}
+  .l-meta{font-size:calc(var(--u)*0.082);color:var(--mid);font-weight:600;line-height:1.4;letter-spacing:.01em;}
+  .l-meta .u{display:inline-block;min-width:calc(var(--u)*0.7);border-bottom:0.15mm solid var(--muted);}
+  .l-meta .site{color:var(--muted);font-weight:500;}
+  .l-qr{width:min(calc(var(--H)*0.6),calc(var(--W)*0.28));height:min(calc(var(--H)*0.6),calc(var(--W)*0.28));flex-shrink:0;border-radius:0.6mm;overflow:hidden;background:#fff;display:flex;align-items:center;justify-content:center;}
+  .l-qr img,.l-qr canvas{width:100%;height:100%;display:block;image-rendering:pixelated;}
+  .l-qr.empty{border:0.15mm dashed var(--muted);}
+  /* ---- print sheet ---- */
+  .sheet{display:none;}
+  @media print{
+    @page{margin:8mm;}
+    body{background:#fff;}
+    .panel,.stage{display:none !important;}
+    .app{display:block;}
+    .sheet{display:flex !important;flex-wrap:wrap;gap:3mm;align-content:flex-start;}
+    .sheet .label{break-inside:avoid;}
+    .sheet .label.cut{outline:0.15mm dashed #b9c8da;outline-offset:0.4mm;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- CONTROLS -->
+  <aside class="panel">
+    <h1>Cryonix Label Studio</h1>
+    <p class="sub">Research-use vial labels. Pick a peptide, set the lot, choose the vial size, print a sheet.</p>
+
+    <div class="grp">
+      <label>Peptide</label>
+      <input id="name" list="plist" placeholder="e.g. Tirzepatide" value="Tirzepatide" autocomplete="off"/>
+      <datalist id="plist"></datalist>
+    </div>
+    <div class="row2">
+      <div class="grp"><label>Strength</label><input id="mg" placeholder="5 mg" value="5 mg"/></div>
+      <div class="grp"><label>Descriptor (optional)</label><input id="desc" placeholder="Lyophilized peptide" value="Lyophilized research peptide"/></div>
+    </div>
+    <div class="row2">
+      <div class="grp"><label>Lot / Batch #</label><input id="lot" placeholder="leave blank to hand-write"/></div>
+      <div class="grp"><label>Date (MFG)</label><input id="date" placeholder="blank to hand-write"/></div>
+    </div>
+
+    <div class="grp">
+      <label>Vial size</label>
+      <select id="preset">
+        <option value="60,25">5 mL vial — 60 × 25 mm</option>
+        <option value="68,30" selected>10 mL vial — 68 × 30 mm</option>
+        <option value="80,35">15 mL vial — 80 × 35 mm</option>
+        <option value="85,40">20 mL vial — 85 × 40 mm</option>
+        <option value="120,50">50 mL vial — 120 × 50 mm</option>
+        <option value="custom">Custom…</option>
+      </select>
+    </div>
+    <div class="row2">
+      <div class="grp"><label>Width (mm)</label><input id="w" type="number" value="68" min="15" max="200" step="1"/></div>
+      <div class="grp"><label>Height (mm)</label><input id="h" type="number" value="30" min="10" max="120" step="1"/></div>
+    </div>
+
+    <div class="grp">
+      <label>QR links to</label>
+      <input id="qr" value="https://cryonixresearch.com" autocomplete="off"/>
+      <div class="hint">Same QR on every label → your COA library. Change here if your domain differs.</div>
+    </div>
+
+    <div class="grp">
+      <label>Copies to print</label>
+      <input id="copies" type="number" value="24" min="1" max="500" step="1"/>
+      <label class="chk"><input type="checkbox" id="cut" checked/> Show cut guides</label>
+    </div>
+
+    <button class="btn" onclick="printSheet()">🖨 Print sheet (or Save as PDF)</button>
+    <button class="btn ghost" onclick="resetAll()">Reset fields</button>
+  </aside>
+
+  <!-- PREVIEW -->
+  <main class="stage">
+    <div class="cap">Live preview · <b id="dimcap">48 × 25 mm</b> · shown near actual size</div>
+    <div id="preview"></div>
+    <div class="cap" style="max-width:460px;text-align:center;line-height:1.6;">Tip: in the print dialog choose <b>Save as PDF</b> for a file, or print directly onto label stock. Set scale to 100% and margins to Default.</div>
+  </main>
+</div>
+
+<!-- hidden print sheet -->
+<div class="sheet" id="sheet"></div>
+<!-- hidden QR factory -->
+<div id="qrFactory" style="position:absolute;left:-9999px;top:-9999px;"></div>
+
+<script>
+  // ---- helix mark (sky on navy) ----
+  const HELIX = '<svg viewBox="0 0 24 24" fill="none" stroke="#4fa3f7" stroke-width="1.8" stroke-linecap="round"><path d="M8 2c0 4 8 6 8 10s-8 6-8 10"/><path d="M16 2c0 4-8 6-8 10s8 6 8 10"/><line x1="9" y1="6" x2="15" y2="6"/><line x1="7.6" y1="9.5" x2="16.4" y2="9.5"/><line x1="7.6" y1="14.5" x2="16.4" y2="14.5"/><line x1="9" y1="18" x2="15" y2="18"/></svg>';
+
+  // ---- current product roster (autocomplete; edit freely) ----
+  const PRODUCTS = [
+    ['Tirzepatide','5 mg'],['Semaglutide','5 mg'],['Retatrutide','5 mg'],['Cagrilintide','5 mg'],
+    ['MOTS-c','10 mg'],['BPC-157','5 mg'],['TB-500','5 mg'],['Tesamorelin','5 mg'],
+    ['BPC-157 / TB-500 Blend','5 mg / 5 mg'],['CJC-1295 + Ipamorelin','5 mg / 5 mg'],
+    ['CJC-1295 No DAC','5 mg'],['Epithalon','10 mg'],['NAD+','100 mg'],['Bacteriostatic Water','30 mL']
+  ];
+  const mgFor = {};
+  (function(){
+    const dl = document.getElementById('plist');
+    PRODUCTS.forEach(function(p){ mgFor[p[0].toLowerCase()] = p[1]; var o=document.createElement('option'); o.value=p[0]; dl.appendChild(o); });
+  })();
+
+  // try to refresh the roster live from the published Products sheet (best-effort)
+  (function(){
+    var url="https://docs.google.com/spreadsheets/d/e/2PACX-1vTOVDkP0WwK7fOiaKw7i5pnFYJb9P5RBDkyZ9KMfXHOCQ7eGlD81BlXtvm3r0ArpVhnp8TjKlmH5_6O/pub?gid=0&single=true&output=csv";
+    fetch(url+"&t="+Date.now()).then(function(r){return r.ok?r.text():Promise.reject();}).then(function(t){
+      var rows=t.replace(/\r/g,'').split('\n').map(function(l){return l.split(',');});
+      if(rows.length<2)return; var h=rows[0].map(function(x){return x.trim().toLowerCase();});
+      var ni=h.indexOf('name'), mi=h.indexOf('mg'); if(ni<0)return;
+      var dl=document.getElementById('plist'); dl.innerHTML='';
+      for(var i=1;i<rows.length;i++){var nm=(rows[i][ni]||'').trim(); if(!nm)continue; var mg=mi>=0?(rows[i][mi]||'').trim():'';
+        mgFor[nm.toLowerCase()]=mg; var o=document.createElement('option'); o.value=nm; dl.appendChild(o);}
+    }).catch(function(){});
+  })();
+
+  // ---- QR generation (same for every label) ----
+  let qrDataUrl = '';
+  function buildQR(){
+    var box=document.getElementById('qrFactory'); box.innerHTML='';
+    var val=document.getElementById('qr').value.trim();
+    if(!val || typeof QRCode==='undefined'){ qrDataUrl=''; render(); return; }
+    try{
+      new QRCode(box,{text:val,width:480,height:480,correctLevel:QRCode.CorrectLevel.M,colorDark:'#031c3d',colorLight:'#ffffff'});
+      setTimeout(function(){
+        var img=box.querySelector('img'), cv=box.querySelector('canvas');
+        qrDataUrl = img && img.src ? img.src : (cv ? cv.toDataURL('image/png') : '');
+        render();
+      },60);
+    }catch(e){ qrDataUrl=''; render(); }
+  }
+
+  // ---- build one label's HTML ----
+  function labelHTML(d, withCut, scale){
+    var lot = d.lot ? esc(d.lot) : '<span class="u"></span>';
+    var date = d.date ? esc(d.date) : '<span class="u"></span>';
+    var qr = qrDataUrl
+      ? '<div class="l-qr"><img src="'+qrDataUrl+'" alt="QR"/></div>'
+      : '<div class="l-qr empty"></div>';
+    var desc = d.desc ? '<div class="l-desc">'+esc(d.desc)+'</div>' : '';
+    return '<div class="label'+(withCut?' cut':'')+'" style="--W:'+d.w+'mm;--H:'+d.h+'mm;--scale:'+(scale||1)+'">'
+      + '<div class="l-main">'
+      + '<div class="l-top"><div class="l-brand"><div class="l-mark">'+HELIX+'</div>'
+      + '<div class="l-word">Cryonix<span>.</span></div></div>'
+      + '<div class="l-ruo-tag">Research Use Only</div></div>'
+      + '<div><div class="l-mid"><div class="l-name">'+esc(d.name||'Peptide')+'</div>'
+      + (d.mg?'<div class="l-mg">'+esc(d.mg)+'</div>':'')+'</div>'+desc+'</div>'
+      + '<div class="l-rule"></div>'
+      + '<div class="l-warn">For research use only · Not for human or veterinary consumption</div>'
+      + '<div class="l-meta">LOT: '+lot+' &nbsp;·&nbsp; MFG: '+date+' &nbsp;·&nbsp; <span class="site">cryonixresearch.com</span></div>'
+      + '</div>'
+      + '<div class="l-side">'+qr+'</div>'
+      + '</div>';
+  }
+
+  function readData(){
+    return {
+      name:document.getElementById('name').value,
+      mg:document.getElementById('mg').value,
+      desc:document.getElementById('desc').value,
+      lot:document.getElementById('lot').value,
+      date:document.getElementById('date').value,
+      w:clamp(+document.getElementById('w').value||48,15,220),
+      h:clamp(+document.getElementById('h').value||25,10,140)
+    };
+  }
+
+  var LBL_SCALE=1;
+  function fitLabel(el){
+    if(!el)return 1;
+    var main=el.querySelector('.l-main'); if(!main)return 1;
+    var s=1; el.style.setProperty('--scale',s);
+    for(var i=0;i<18 && s>0.5 && main.scrollHeight>main.clientHeight+0.5;i++){
+      s=Math.round((s-0.04)*1000)/1000; el.style.setProperty('--scale',s);
+    }
+    return s;
+  }
+
+  function render(){
+    var d=readData();
+    var host=document.getElementById('preview');
+    host.innerHTML=labelHTML(d,false,1);
+    LBL_SCALE=fitLabel(host.querySelector('.label'));
+    document.getElementById('dimcap').textContent=d.w+' × '+d.h+' mm';
+  }
+
+  function buildSheet(){
+    var d=readData(); var n=clamp(+document.getElementById('copies').value||1,1,500);
+    var cut=document.getElementById('cut').checked;
+    var html=''; for(var i=0;i<n;i++){html+=labelHTML(d,cut,LBL_SCALE);}
+    document.getElementById('sheet').innerHTML=html;
+  }
+
+  function printSheet(){ buildSheet(); setTimeout(function(){window.print();},80); }
+
+  // ---- helpers ----
+  function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+  function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+
+  // ---- wiring ----
+  ['name','mg','desc','lot','date','w','h'].forEach(function(id){
+    document.getElementById(id).addEventListener('input',function(){ if(id==='name'){var m=mgFor[this.value.toLowerCase()]; if(m)document.getElementById('mg').value=m;} render(); });
+  });
+  document.getElementById('preset').addEventListener('change',function(){
+    if(this.value==='custom')return;
+    var p=this.value.split(','); document.getElementById('w').value=p[0]; document.getElementById('h').value=p[1]; render();
+  });
+  document.getElementById('qr').addEventListener('input',buildQR);
+  function resetAll(){
+    document.getElementById('name').value='Tirzepatide';document.getElementById('mg').value='5 mg';
+    document.getElementById('desc').value='Lyophilized research peptide';document.getElementById('lot').value='';
+    document.getElementById('date').value='';document.getElementById('preset').value='68,30';
+    document.getElementById('w').value=68;document.getElementById('h').value=30;render();
+  }
+
+  buildQR(); // generates QR then renders
+  render();
+</script>
+</body>
+</html>
